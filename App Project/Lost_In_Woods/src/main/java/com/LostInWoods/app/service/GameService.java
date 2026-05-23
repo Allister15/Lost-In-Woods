@@ -2,6 +2,7 @@ package com.LostInWoods.app.service;
 
 import com.LostInWoods.app.dto.ChoiceOutcomeResponse;
 import com.LostInWoods.app.dto.PlayerResponse;
+import com.LostInWoods.app.dto.SceneResponse;
 import com.LostInWoods.app.entity.Choice;
 import com.LostInWoods.app.entity.GameProgress;
 import com.LostInWoods.app.entity.Player;
@@ -9,6 +10,10 @@ import com.LostInWoods.app.entity.Scene;
 import com.LostInWoods.app.exception.InvalidGameStateException;
 import com.LostInWoods.app.exception.ResourceNotFoundException;
 import com.LostInWoods.app.repository.GameProgressRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,13 +126,13 @@ public class GameService {
     /**
      * Response DTO for game state
      */
-    @lombok.Data
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    @lombok.Builder
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class GameStateResponse {
         private PlayerResponse player;
-        private com.LostInWoods.app.dto.SceneResponse currentScene;
+        private SceneResponse currentScene;
         private boolean isGameOver;
         private boolean isVictory;
     }

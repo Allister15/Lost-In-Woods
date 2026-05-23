@@ -2,8 +2,6 @@ package com.LostInWoods.app.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.*;
-import java.time.LocalDateTime;
 
 /**
  * Player Entity
@@ -12,11 +10,6 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "players")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Player {
 
     @Id
@@ -49,42 +42,59 @@ public class Player {
     private Long currentSceneId;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private java.time.LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private java.time.LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        createdAt = java.time.LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
         if (currentHealth == null) {
-            currentHealth = 100; // Initial health
+            currentHealth = 100;
         }
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = java.time.LocalDateTime.now();
     }
 
-    /**
-     * Checks if the player is alive (health > 0)
-     */
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public Integer getAge() { return age; }
+    public void setAge(Integer age) { this.age = age; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public Integer getCurrentHealth() { return currentHealth; }
+    public void setCurrentHealth(Integer currentHealth) { this.currentHealth = currentHealth; }
+
+    public Long getCurrentSceneId() { return currentSceneId; }
+    public void setCurrentSceneId(Long currentSceneId) { this.currentSceneId = currentSceneId; }
+
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public java.time.LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Business logic methods
     public boolean isAlive() {
         return currentHealth > 0;
     }
 
-    /**
-     * Applies damage to the player
-     */
     public void takeDamage(int damage) {
         this.currentHealth = Math.max(0, this.currentHealth - damage);
     }
 
-    /**
-     * Heals the player
-     */
     public void heal(int healAmount) {
         this.currentHealth = Math.min(100, this.currentHealth + healAmount);
     }
