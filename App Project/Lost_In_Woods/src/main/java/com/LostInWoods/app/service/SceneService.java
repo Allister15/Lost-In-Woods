@@ -7,7 +7,6 @@ import com.LostInWoods.app.entity.Scene;
 import com.LostInWoods.app.exception.ResourceNotFoundException;
 import com.LostInWoods.app.repository.ChoiceRepository;
 import com.LostInWoods.app.repository.SceneRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +19,16 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
+
 public class SceneService {
 
     private final SceneRepository sceneRepository;
     private final ChoiceRepository choiceRepository;
+
+    public SceneService(SceneRepository sceneRepository, ChoiceRepository choiceRepository) {
+        this.sceneRepository = sceneRepository;
+        this.choiceRepository = choiceRepository;
+    }
 
     /**
      * Gets a scene by ID with all its choices

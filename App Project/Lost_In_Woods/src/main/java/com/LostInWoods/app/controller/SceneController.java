@@ -3,7 +3,6 @@ package com.LostInWoods.app.controller;
 import com.LostInWoods.app.dto.ChoiceResponse;
 import com.LostInWoods.app.dto.SceneResponse;
 import com.LostInWoods.app.service.SceneService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +14,15 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/scenes")
-@RequiredArgsConstructor
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SceneController {
 
     private final SceneService sceneService;
+
+    public SceneController(SceneService sceneService) {
+        this.sceneService = sceneService;
+    }
 
     /**
      * Get scene by ID with all choices

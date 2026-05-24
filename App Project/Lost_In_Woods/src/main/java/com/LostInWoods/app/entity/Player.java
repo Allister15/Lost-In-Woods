@@ -98,4 +98,42 @@ public class Player {
     public void heal(int healAmount) {
         this.currentHealth = Math.min(100, this.currentHealth + healAmount);
     }
+
+    // Builder pattern
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private Integer age;
+        private String gender;
+        private Integer currentHealth;
+        private Long currentSceneId;
+        private java.time.LocalDateTime createdAt;
+        private java.time.LocalDateTime updatedAt;
+
+        public Builder id(Long id) { this.id = id; return this; }
+        public Builder name(String name) { this.name = name; return this; }
+        public Builder age(Integer age) { this.age = age; return this; }
+        public Builder gender(String gender) { this.gender = gender; return this; }
+        public Builder currentHealth(Integer currentHealth) { this.currentHealth = currentHealth; return this; }
+        public Builder currentSceneId(Long currentSceneId) { this.currentSceneId = currentSceneId; return this; }
+        public Builder createdAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
+        public Builder updatedAt(java.time.LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
+
+        public Player build() {
+            Player player = new Player();
+            player.id = this.id;
+            player.name = this.name;
+            player.age = this.age;
+            player.gender = this.gender;
+            player.currentHealth = this.currentHealth;
+            player.currentSceneId = this.currentSceneId;
+            player.createdAt = this.createdAt;
+            player.updatedAt = this.updatedAt;
+            return player;
+        }
+    }
 }

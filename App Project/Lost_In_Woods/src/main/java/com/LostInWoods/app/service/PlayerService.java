@@ -5,7 +5,6 @@ import com.LostInWoods.app.dto.PlayerResponse;
 import com.LostInWoods.app.entity.Player;
 import com.LostInWoods.app.exception.ResourceNotFoundException;
 import com.LostInWoods.app.repository.PlayerRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
+
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+
+    public PlayerService(PlayerRepository playerRepository) {
+        this.playerRepository = playerRepository;
+    }
 
     /**
      * Creates a new player

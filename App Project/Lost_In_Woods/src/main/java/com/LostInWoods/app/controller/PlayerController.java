@@ -4,7 +4,6 @@ import com.LostInWoods.app.dto.PlayerCreateRequest;
 import com.LostInWoods.app.dto.PlayerResponse;
 import com.LostInWoods.app.service.PlayerService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +14,15 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/players")
-@RequiredArgsConstructor
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class PlayerController {
 
     private final PlayerService playerService;
+
+    public PlayerController(PlayerService playerService) {
+        this.playerService = playerService;
+    }
 
     /**
      * Create a new player

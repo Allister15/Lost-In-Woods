@@ -4,7 +4,6 @@ import com.LostInWoods.app.dto.ChoiceActionRequest;
 import com.LostInWoods.app.dto.ChoiceOutcomeResponse;
 import com.LostInWoods.app.service.GameService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +13,15 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/game")
-@RequiredArgsConstructor
+
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class GameController {
 
     private final GameService gameService;
+
+    public GameController(GameService gameService) {
+        this.gameService = gameService;
+    }
 
     /**
      * Make a choice in the game

@@ -1,9 +1,5 @@
 package com.LostInWoods.app.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -91,15 +87,62 @@ public class GlobalExceptionHandler {
     /**
      * Error response DTO for consistent error format
      */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
+    
+    
+    
+    
     public static class ErrorResponse {
         private LocalDateTime timestamp;
         private int status;
         private String error;
         private String message;
         private Map<String, String> validationErrors;
+
+        public ErrorResponse() {}
+
+        public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, Map<String, String> validationErrors) {
+            this.timestamp = timestamp;
+            this.status = status;
+            this.error = error;
+            this.message = message;
+            this.validationErrors = validationErrors;
+        }
+
+        public LocalDateTime getTimestamp() { return timestamp; }
+        public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+
+        public int getStatus() { return status; }
+        public void setStatus(int status) { this.status = status; }
+
+        public String getError() { return error; }
+        public void setError(String error) { this.error = error; }
+
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+
+        public Map<String, String> getValidationErrors() { return validationErrors; }
+        public void setValidationErrors(Map<String, String> validationErrors) { this.validationErrors = validationErrors; }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private LocalDateTime timestamp;
+            private int status;
+            private String error;
+            private String message;
+            private Map<String, String> validationErrors;
+
+            public Builder timestamp(LocalDateTime timestamp) { this.timestamp = timestamp; return this; }
+            public Builder status(int status) { this.status = status; return this; }
+            public Builder error(String error) { this.error = error; return this; }
+            public Builder message(String message) { this.message = message; return this; }
+            public Builder validationErrors(Map<String, String> validationErrors) { this.validationErrors = validationErrors; return this; }
+
+            public ErrorResponse build() {
+                return new ErrorResponse(timestamp, status, error, message, validationErrors);
+            }
+        }
     }
 }

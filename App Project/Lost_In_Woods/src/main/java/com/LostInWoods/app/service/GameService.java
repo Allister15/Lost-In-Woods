@@ -10,11 +10,6 @@ import com.LostInWoods.app.entity.Scene;
 import com.LostInWoods.app.exception.InvalidGameStateException;
 import com.LostInWoods.app.exception.ResourceNotFoundException;
 import com.LostInWoods.app.repository.GameProgressRepository;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class GameService {
 
     private final PlayerService playerService;
     private final SceneService sceneService;
     private final GameProgressRepository gameProgressRepository;
+
+    public GameService(PlayerService playerService, SceneService sceneService, GameProgressRepository gameProgressRepository) {
+        this.playerService = playerService;
+        this.sceneService = sceneService;
+        this.gameProgressRepository = gameProgressRepository;
+    }
 
     /**
      * Process a player's choice and update game state
@@ -126,14 +126,55 @@ public class GameService {
     /**
      * Response DTO for game state
      */
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
+    
+    
+    
+    
     public static class GameStateResponse {
         private PlayerResponse player;
         private SceneResponse currentScene;
         private boolean isGameOver;
         private boolean isVictory;
+
+        public GameStateResponse() {}
+
+        public GameStateResponse(PlayerResponse player, SceneResponse currentScene, boolean isGameOver, boolean isVictory) {
+            this.player = player;
+            this.currentScene = currentScene;
+            this.isGameOver = isGameOver;
+            this.isVictory = isVictory;
+        }
+
+        public PlayerResponse getPlayer() { return player; }
+        public void setPlayer(PlayerResponse player) { this.player = player; }
+
+        public SceneResponse getCurrentScene() { return currentScene; }
+        public void setCurrentScene(SceneResponse currentScene) { this.currentScene = currentScene; }
+
+        public boolean isGameOver() { return isGameOver; }
+        public void setGameOver(boolean isGameOver) { this.isGameOver = isGameOver; }
+
+        public boolean isVictory() { return isVictory; }
+        public void setVictory(boolean isVictory) { this.isVictory = isVictory; }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private PlayerResponse player;
+            private SceneResponse currentScene;
+            private boolean isGameOver;
+            private boolean isVictory;
+
+            public Builder player(PlayerResponse player) { this.player = player; return this; }
+            public Builder currentScene(SceneResponse currentScene) { this.currentScene = currentScene; return this; }
+            public Builder isGameOver(boolean isGameOver) { this.isGameOver = isGameOver; return this; }
+            public Builder isVictory(boolean isVictory) { this.isVictory = isVictory; return this; }
+
+            public GameStateResponse build() {
+                return new GameStateResponse(player, currentScene, isGameOver, isVictory);
+            }
+        }
     }
 }
