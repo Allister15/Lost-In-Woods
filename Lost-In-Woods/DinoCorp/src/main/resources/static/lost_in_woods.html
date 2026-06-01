@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Lost In Woods — dinoCorp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --font-d: 'Crimson Text', serif;
+            --dx: 0px; /* <--- Add this exact line right here */
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --green:#4ade80;--green-dim:#166534;--green-dark:#052e16;
+            --red:#ef4444;--amber:#fbbf24;--ink:#060806;
+            --border:rgba(74,222,128,0.13);--text:#c8d8c8;--muted:#4a5e4a;
+            --font-t:'Cinzel',serif;--font-b:'Crimson Text',serif;
+        }
+        html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--font-b);color:var(--text);font-size:18px;}
+
+        /* ─── PARTICLES ─── */
+        #particles{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;}
+        .pt{position:absolute;border-radius:50%;background:rgba(74,222,128,0.35);animation:floatup linear infinite;}
+        @keyframes floatup{0%{transform:translateY(105vh) translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:0.5;}100%{transform:translateY(-5vh) translateX(var(--dx));opacity:0;}}
+        #scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);}
+        #trans{position:fixed;inset:0;z-index:60;background:#000;opacity:0;pointer-events:none;transition:opacity 0.45s ease;}
+        #trans.on{opacity:1;pointer-events:all;}
+
+        /* ─── AUTH SCREEN (SPLASH ALTERNATIVE) ─── */
+        #splash{
+            position:fixed;inset:0;z-index:80;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            background:radial-gradient(ellipse at 50% 60%, #071a09 0%, #000 70%);
+            overflow:hidden;
+        }
+        #splash-trees{position:absolute;bottom:0;left:0;right:0;height:45%;pointer-events:none;}
+        #splash-fog{
+            position:absolute;bottom:0;left:0;right:0;height:35%;
+            background:linear-gradient(to top, rgba(8,30,10,0.9) 0%, rgba(8,30,10,0.4) 60%, transparent 100%);
+        }
+        .splash-content{position:relative;z-index:2;text-align:center;padding:0 20px; width: 100%; max-width: 400px;}
+        .splash-dino{
+            font-family:var(--font-t);font-size:11px;letter-spacing:6px;
+            color:rgba(74,222,128,0.5);text-transform:uppercase;margin-bottom:20px;
+            animation:fadeInDown 1s ease 0.3s both;
+        }
+        .splash-title{
+            font-family:var(--font-t);font-size:clamp(32px,5vw,54px);font-weight:900;
+            color:var(--green);letter-spacing:6px;line-height:1;
+            text-shadow:0 0 60px rgba(74,222,128,0.25),0 0 120px rgba(74,222,128,0.1);
+            animation:fadeInDown 1s ease 0.6s both;
+            margin-bottom:10px;
+        }
+        .splash-subtitle{
+            font-family:var(--font-b);font-size:14px;font-style:italic;
+            color:rgba(200,216,200,0.5);letter-spacing:3px;
+            animation:fadeInDown 1s ease 0.9s both;margin-bottom:30px;
+        }
+
+        /* Authentication inputs custom styled to look retro-dark */
+        .auth-input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            background: rgba(5, 15, 5, 0.85);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            color: #fff;
+            font-family: var(--font-b);
+            font-size: 16px;
+            border-radius: 3px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .auth-input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+        }
+
+        .splash-play {
+            font-family:var(--font-t);font-size:13px;letter-spacing:4px;
+            background:transparent;border:1px solid var(--green);
+            color:var(--green);padding:14px 0;border-radius:3px;
+            cursor:pointer;text-transform:uppercase;width: 100%;
+            animation:fadeInDown 1s ease 1.2s both;
+            transition:all 0.3s;position:relative;overflow:hidden;
+        }
+        .splash-play::before{content:'';position:absolute;inset:0;background:var(--green);opacity:0;transition:opacity 0.3s;}
+        .splash-play:hover::before{opacity:0.1;}
+        .splash-play:hover{box-shadow:0 0 30px rgba(74,222,128,0.2); background: var(--green); color: #000;}
+
+        #auth-msg {
+            font-size: 13px; margin-top: 15px; min-height: 20px; font-family: var(--font-b); letter-spacing: 1px;
+        }
+
+        .splash-credits{
+            position:absolute;bottom:28px;left:0;right:0;text-align:center;
+            animation:fadeInDown 1s ease 1.5s both;
+        }
+        .credits-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+        .credits-members{display:flex;gap:0;justify-content:center;flex-wrap:wrap;}
+        .credit-name{
+            font-family:var(--font-t);font-size:11px;letter-spacing:1px;
+            color:rgba(74,222,128,0.55);padding:4px 14px;
+            border-right:1px solid rgba(74,222,128,0.15);
+        }
+        .credit-name:last-child{border-right:none;}
+
+        @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+
+        /* ─── GAME UI ─── */
+        #game{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;display:none;}
+        @keyframes flicker{0%,100%{opacity:1}93%{opacity:0.96}94%{opacity:1}98%{opacity:0.98}}
+        #game{animation:flicker 9s infinite;}
+
+        /* topbar */
+        #topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);flex-shrink:0;}
+        #gtitle{font-family:var(--font-t);font-size:13px;letter-spacing:4px;color:var(--green);opacity:0.8;}
+        #hud{display:flex;gap:24px;align-items:center;}
+        .hud-item{text-align:center;}
+        .hud-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+        .hud-val{font-family:var(--font-t);font-size:15px;color:var(--green);}
+        #hp-wrap{width:110px;}
+        #hp-bg{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:3px;}
+        #hp-fill{height:100%;border-radius:3px;transition:width 0.6s,background 0.6s;width:80%;}
+
+        /* chapter dots */
+        #cdots{display:flex;gap:5px;align-items:center;justify-content:center;padding:8px;flex-shrink:0;}
+        .cdot{width:30px;height:3px;border-radius:2px;background:rgba(255,255,255,0.07);transition:all 0.4s;}
+        .cdot.done{background:var(--green-dim);}
+        .cdot.active{background:var(--green);box-shadow:0 0 8px var(--green);}
+        .cdot.fail{background:var(--red);}
+
+        /* main split */
+        #main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+        /* left — scene illustration */
+        #left{width:44%;flex-shrink:0;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;border-right:1px solid var(--border);}
+        #scene-frame{position:absolute;inset:0;overflow:hidden;background:#050d05;}
+        #scene-svg-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:opacity 0.8s;}
+        #scene-svg-wrap svg{width:100%;height:100%;object-fit:cover;}
+        #scene-grad{position:absolute;inset:0;background:linear-gradient(to right,transparent 30%,rgba(0,0,0,0.85) 100%),linear-gradient(to top,rgba(0,0,0,0.8) 0%,transparent 45%);}
+        #img-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(0,0,0,0.85);transition:opacity 0.5s;}
+        #img-loading.hide{opacity:0;pointer-events:none;}
+        .ring{width:36px;height:36px;border:2px solid rgba(74,222,128,0.15);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .rtext{font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+
+        /* entity card */
+        #entity-card{position:relative;z-index:2;background:rgba(0,0,0,0.65);border:1px solid var(--border);border-radius:10px;padding:14px 16px;backdrop-filter:blur(8px);}
+        .e-avatar{font-size:32px;margin-bottom:5px;display:block;}
+        .e-name{font-family:var(--font-t);font-size:12px;color:var(--green);letter-spacing:2px;margin-bottom:5px;}
+        .e-quote{font-style:italic;font-size:13px;color:rgba(200,216,200,0.65);line-height:1.6;border-left:2px solid var(--green-dim);padding-left:8px;}
+
+        /* right — story */
+        #right{flex:1;display:flex;flex-direction:column;padding:18px 26px 14px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;}
+        #traits-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;min-height:22px;}
+        .trait{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid;font-weight:600;}
+        .t-stealth{background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.35);color:#a78bfa;}
+        .t-brave{background:rgba(251,146,60,0.12);border-color:rgba(251,146,60,0.35);color:#fb923c;}
+        .t-cautious{background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.35);color:#38bdf8;}
+        .t-resourceful{background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.35);color:#4ade80;}
+        .t-reckless{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35);color:#ef4444;}
+        .t-friendly{background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.35);color:#fbbf24;}
+
+        #log-strip{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;max-height:66px;overflow:hidden;}
+        .log-e{font-size:12px;letter-spacing:0.4px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:6px;align-items:baseline;}
+        .lg{color:rgba(74,222,128,0.55);}
+        .lb{color:rgba(239,68,68,0.55);}
+
+        #chap-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:7px;}
+        #scen-text{font-size:16px;line-height:1.75;color:#d4e8d4;margin-bottom:7px;}
+        #hint-text{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:18px;padding-left:10px;border-left:1px solid var(--border);}
+        #choices{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+        .ch {background:rgba(5,15,5,0.75);border:1px solid rgba(74,222,128,0.14);border-radius:9px;padding:13px 15px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all 0.22s;position:relative;overflow:hidden;text-align:left;width: 100%;}
+        .ch::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(74,222,128,0.05),transparent);opacity:0;transition:opacity 0.22s;}
+        .ch:hover:not(:disabled){border-color:rgba(74,222,128,0.4);transform:translateX(5px);}
+        .ch:hover::before{opacity:1;}
+        .ch:disabled{cursor:default;transform:none;}
+        .ch.correct{border-color:var(--green);background:rgba(15,50,15,0.8);animation:gg 0.5s ease;}
+        .ch.wrong{border-color:var(--red);background:rgba(50,5,5,0.8);animation:shk 0.4s ease;}
+        @keyframes gg{0%,100%{box-shadow:none;}50%{box-shadow:0 0 20px rgba(74,222,128,0.25);}}
+        @keyframes shk{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+        .ch-key{width:24px;height:24px;border-radius:5px;border:1px solid rgba(74,222,128,0.22);display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:10px;color:var(--green);flex-shrink:0;margin-top:2px;}
+        .ch-main{font-size:14px;color:#d4e8d4;line-height:1.5;margin-bottom:1px;}
+        .ch-meta{font-size:12px;color:var(--muted);font-style:italic;}
+        #feedback{background:rgba(0,0,0,0.5);border-radius:9px;padding:13px 16px;font-size:14px;line-height:1.7;border-left:3px solid;display:none;animation:fup 0.4s ease;}
+        #feedback.show{display:block;}
+        #feedback.good{border-color:var(--green);color:#a7f3d0;}
+        #feedback.bad{border-color:var(--red);color:#fca5a5;}
+        @keyframes fup{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+        #kb{font-size:10px;letter-spacing:1px;color:var(--muted);text-align:center;padding:5px;flex-shrink:0;opacity:0.45;text-transform:uppercase;}
+
+        /* ─── END SCREEN ─── */
+        #end{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.93);backdrop-filter:blur(14px);flex-direction:column;padding:28px;}
+        #end.show{display:flex;}
+        #end-inner{max-width:660px;width:100%;text-align:center;animation:fup 0.6s ease;}
+        #end-title{font-family:var(--font-t);font-size:clamp(26px,4vw,40px);margin-bottom:7px;letter-spacing:3px;}
+        #end-verdict{font-size:15px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
+        #end-score{font-family:var(--font-t);font-size:clamp(40px,6vw,58px);color:var(--green);margin-bottom:3px;text-shadow:0 0 30px rgba(74,222,128,0.3);}
+        #end-sl{font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:18px;text-transform:uppercase;}
+        #end-traits{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
+        #end-story{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:left;max-height:190px;overflow-y:auto;margin-bottom:22px;}
+        #end-story h3{font-family:var(--font-t);font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:12px;text-transform:uppercase;}
+        .beat{font-size:13px;line-height:1.65;color:var(--muted);padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:8px;}
+        .beat-ic{flex-shrink:0;margin-top:2px;}
+        #end-dino{font-family:var(--font-t);font-size:10px;letter-spacing:3px;color:rgba(74,222,128,0.3);margin-bottom:16px;text-transform:uppercase;}
+        #rbtn{font-family:var(--font-t);font-size:12px;letter-spacing:3px;background:transparent;border:1px solid var(--green);color:var(--green);padding:13px 38px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.3s;}
+        #rbtn:hover{background:var(--green);color:#000;}
+
+        @media(max-width:680px){#left{display:none;}#right{padding:14px;}}
+    </style>
+</head>
+<body>
+
+<div id="particles"></div>
+<div id="scanlines"></div>
+<div id="trans"></div>
+
+<div id="splash">
+    <svg id="splash-trees" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.25" fill="#0d2e0d">
+            <polygon points="60,400 90,280 120,400"/>
+            <polygon points="100,400 135,250 170,400"/>
+            <polygon points="155,400 185,290 215,400"/>
+            <polygon points="200,400 240,220 280,400"/>
+            <polygon points="280,400 310,260 340,400"/>
+            <polygon points="350,400 390,200 430,400"/>
+            <polygon points="430,400 465,240 500,400"/>
+            <polygon points="500,400 540,210 580,400"/>
+            <polygon points="570,400 610,180 650,400"/>
+            <polygon points="650,400 690,220 730,400"/>
+            <polygon points="730,400 770,200 810,400"/>
+            <polygon points="800,400 840,230 880,400"/>
+            <polygon points="870,400 910,190 950,400"/>
+            <polygon points="950,400 990,220 1030,400"/>
+            <polygon points="1030,400 1070,250 1110,400"/>
+            <polygon points="1100,400 1140,270 1180,400"/>
+        </g>
+        <g opacity="0.5" fill="#081c08">
+            <polygon points="0,400 40,260 80,400"/>
+            <polygon points="70,400 120,200 170,400"/>
+            <polygon points="180,400 235,170 290,400"/>
+            <polygon points="300,400 360,140 420,400"/>
+            <polygon points="420,400 470,190 520,400"/>
+            <polygon points="540,400 600,120 660,400"/>
+            <polygon points="680,400 740,150 800,400"/>
+            <polygon points="800,400 855,170 910,400"/>
+            <polygon points="920,400 975,140 1030,400"/>
+            <polygon points="1040,400 1095,175 1150,400"/>
+            <polygon points="1130,400 1175,220 1220,400"/>
+        </g>
+        <g fill="#040c04">
+            <polygon points="-10,400 50,180 110,400"/>
+            <polygon points="150,400 220,100 290,400"/>
+            <polygon points="340,400 410,80 480,400"/>
+            <polygon points="550,400 630,60 710,400"/>
+            <polygon points="750,400 830,90 910,400"/>
+            <polygon points="960,400 1040,75 1120,400"/>
+            <polygon points="1100,400 1165,150 1230,400"/>
+        </g>
+        <rect y="370" width="1200" height="30" fill="#040c04"/>
+    </svg>
+    <div id="splash-fog"></div>
+
+    <div class="splash-content">
+        <div class="splash-dino">dinoCorp Presents</div>
+        <div class="splash-title">🌲 LOST IN WOODS</div>
+        <div class="splash-subtitle">A Dark Forest Survival Adventure</div>
+
+        <input type="text" id="reg-username" class="auth-input" placeholder="Enter Username" autocomplete="off">
+        <input type="password" id="reg-password" class="auth-input" placeholder="Enter Password">
+        <button class="splash-play" onclick="registerAccount()">▶ &nbsp; Sign Up & Start</button>
+
+        <div id="auth-msg"></div>
+    </div>
+
+    <div class="splash-credits">
+        <div class="credits-label">Created by</div>
+        <div class="credits-members">
+            <div class="credit-name">Heeroe Conel</div>
+            <div class="credit-name">John Roque Mance</div>
+            <div class="credit-name">Rich Malig</div>
+            <div class="credit-name">Vince Onte</div>
+        </div>
+    </div>
+</div>
+
+<div id="game">
+    <div id="topbar">
+        <div id="gtitle">🌲 Lost In Woods</div>
+        <div id="hud">
+            <div class="hud-item"><div class="hud-label">Score</div><div class="hud-val" id="h-score">0</div></div>
+            <div class="hud-item"><div class="hud-label">Chapter</div><div class="hud-val" id="h-chap">1/7</div></div>
+            <div class="hud-item">
+                <div class="hud-label">Health</div>
+                <div id="hp-wrap"><div id="hp-bg"><div id="hp-fill"></div></div><div class="hud-val" id="h-hp" style="font-size:11px;margin-top:2px;">100/100</div></div>
+            </div>
+        </div>
+    </div>
+    <div id="cdots"></div>
+    <div id="main">
+        <div id="left">
+            <div id="scene-frame">
+                <div id="scene-svg-wrap"></div>
+                <div id="img-loading"><div class="ring"></div><div class="rtext">Illustrating scene...</div></div>
+                <div id="scene-grad"></div>
+            </div>
+            <div id="entity-card">
+                <span class="e-avatar" id="e-av">🌲</span>
+                <div class="e-name" id="e-name">The Forest</div>
+                <div class="e-quote" id="e-quote">Darkness stirs...</div>
+            </div>
+        </div>
+        <div id="right">
+            <div id="traits-row"></div>
+            <div id="log-strip"></div>
+            <div id="chap-label"></div>
+            <div id="scen-text"></div>
+            <div id="hint-text"></div>
+            <div id="choices"></div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+    <div id="kb">Press A · B · C to choose</div>
+</div>
+
+<div id="end">
+    <div id="end-inner">
+        <div id="end-title"></div>
+        <div id="end-verdict"></div>
+        <div id="end-score"></div>
+        <div id="end-sl">Final Score</div>
+        <div id="end-traits"></div>
+        <div id="end-story"><h3>Your Story</h3><div id="beats"></div></div>
+        <div id="end-dino">dinoCorp · Lost In Woods</div>
+        <button id="rbtn" onclick="restart()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    const BACKEND_URL = '/api';
+    let currentSessionId = null;
+
+    function registerAccount() {
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        fetch(`${BACKEND_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+            .then(res => {
+                if (res.ok) {
+                    return fetch(`${BACKEND_URL}/game/start`, { method: 'POST' });
+                }
+                return res.text().then(text => Promise.reject(new Error(text || 'Registration failed')));
+            })
+            .then(res => res.json())
+            .then(data => {
+                currentSessionId = data.sessionId;
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('game').style.display = 'flex';
+                updateUI(data);
+            })
+            .catch(err => {
+                console.error("Connection error:", err);
+                document.getElementById('auth-msg').textContent = err.message || 'Unable to connect to backend.';
+            });
+    }
+
+    function selectChoice(choiceIndex) {
+        fetch(`${BACKEND_URL}/game/choose`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: currentSessionId,
+                choiceIndex: choiceIndex
+            })
+        })
+            .then(res => res.json())
+            .then(data => updateUI(data))
+            .catch(err => console.error("Error sending choice:", err));
+    }
+
+    function restart() {
+        window.location.reload();
+    }
+
+    function updateUI(data) {
+        document.getElementById('h-hp').textContent = data.hp;
+        document.getElementById('h-score').textContent = data.score;
+        document.getElementById('h-chap').textContent = `${data.sceneIndex + 1}/${Math.max(data.sceneIndex + 1, 7)}`;
+        document.getElementById('chap-label').textContent = data.sceneDescription ? `Scene ${data.sceneIndex + 1}` : '';
+        document.getElementById('scen-text').textContent = data.sceneDescription || 'The forest is quiet.';
+        document.getElementById('hint-text').textContent = data.hint || '';
+
+        const hpFill = document.getElementById('hp-fill');
+        hpFill.style.width = `${Math.max(0, Math.min(100, data.hp))}%`;
+
+        const container = document.getElementById('choices');
+        container.innerHTML = '';
+
+        if (data.choices && data.choices.length > 0 && !data.gameOver) {
+            data.choices.forEach((text, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = text;
+                btn.className = 'ch';
+                btn.onclick = () => selectChoice(index);
+                container.appendChild(btn);
+            });
+        } else {
+            container.innerHTML = '<div class="ch" style="cursor:default;opacity:0.7;">No choices available.</div>';
+        }
+
+        if (data.gameOver) {
+            document.getElementById('end-title').textContent = data.endingTitle || 'The End';
+            document.getElementById('end-verdict').textContent = data.endingVerdict || 'Your journey closes.';
+            document.getElementById('end-score').textContent = data.score;
+            document.getElementById('end').classList.add('show');
+        }
+    }
+</script>
+</body>
+</html>
