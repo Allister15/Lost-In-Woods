@@ -65,6 +65,7 @@ public class PlayerResponse {
     public void setCurrentSceneId(Long currentSceneId) { this.currentSceneId = currentSceneId; }
 
     public Boolean getIsAlive() { return isAlive; }
+    public boolean isAlive() { return Boolean.TRUE.equals(isAlive); }
     public void setIsAlive(Boolean isAlive) { this.isAlive = isAlive; }
 
     // Builder Pattern

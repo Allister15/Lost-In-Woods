@@ -59,9 +59,11 @@ public class SceneResponse {
     public void setIsVictory(Boolean isVictory) { this.isVictory = isVictory; }
 
     public Boolean getIsGameOver() { return isGameOver; }
+    public boolean isGameOver() { return Boolean.TRUE.equals(isGameOver); }
     public void setIsGameOver(Boolean isGameOver) { this.isGameOver = isGameOver; }
 
     public Boolean getIsTerminalScene() { return isTerminalScene; }
+    public boolean isTerminalScene() { return Boolean.TRUE.equals(isTerminalScene); }
     public void setIsTerminalScene(Boolean isTerminalScene) { this.isTerminalScene = isTerminalScene; }
 
     public List<ChoiceResponse> getChoices() { return choices; }

@@ -55,6 +55,7 @@ public class ChoiceOutcomeResponse {
     public void setNextSceneId(Long nextSceneId) { this.nextSceneId = nextSceneId; }
 
     public Boolean getPlayerAlive() { return playerAlive; }
+    public boolean isPlayerAlive() { return Boolean.TRUE.equals(playerAlive); }
     public void setPlayerAlive(Boolean playerAlive) { this.playerAlive = playerAlive; }
 
     public PlayerResponse getUpdatedPlayer() { return updatedPlayer; }

@@ -89,6 +89,10 @@ public class Choice {
     public Integer getDisplayOrder() { return displayOrder; }
     public void setDisplayOrder(Integer displayOrder) { this.displayOrder = displayOrder; }
 
+    public boolean isValidHealthChange() {
+        return healthChange != null && healthChange >= -100 && healthChange <= 100;
+    }
+
     public java.time.LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
 
