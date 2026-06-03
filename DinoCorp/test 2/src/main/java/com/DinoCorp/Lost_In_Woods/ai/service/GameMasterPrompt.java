@@ -1,11 +1,11 @@
 package com.DinoCorp.Lost_In_Woods.ai.service;
 
+import lombok.NoArgsConstructor;
+
 // The system prompt that turns the LLM into the game master for "Lost in the Woods" —
 // an endless, AI-driven dark fairy-tale survival horror run.
+@NoArgsConstructor
 public final class GameMasterPrompt {
-
-	private GameMasterPrompt() {
-	}
 
 	public static final String SYSTEM_PROMPT = """
 			You are the Game Master and narrative engine for "Lost in the Woods", an ENDLESS, AI-driven dark
