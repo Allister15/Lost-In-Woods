@@ -25,6 +25,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
 /* ─── SPLASH ─── */
 #splash{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%, #071a09 0%, #000 70%);overflow:hidden;}
+#home-mute{position:fixed;top:12px;left:12px;z-index:81;width:32px;height:32px;background:rgba(0,0,0,0.4);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;}
+#home-mute:hover{border-color:var(--green);background:rgba(0,0,0,0.6);}
+#home-mute.muted{color:var(--muted);border-color:rgba(255,255,255,0.12);}
 #splash-trees{position:absolute;bottom:0;left:0;right:0;height:45%;pointer-events:none;}
 #splash-fog{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top, rgba(8,30,10,0.9) 0%, rgba(8,30,10,0.4) 60%, transparent 100%);}
 .splash-content{position:relative;z-index:2;text-align:center;padding:0 20px;}
@@ -43,8 +46,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .splash-play:hover{box-shadow:0 0 30px rgba(74,222,128,0.2);}
 .splash-alt{border-color:var(--green-dim);color:rgba(200,216,200,0.75);}
 .splash-alt:hover{border-color:var(--green);box-shadow:none;}
-.splash-back{background:none;border:none;color:var(--muted);font-family:var(--font-b);font-size:13px;letter-spacing:1px;cursor:pointer;padding:4px;}
-.splash-back:hover{color:var(--text);}
+.splash-back{background:none;border:1px solid var(--green-dim);color:var(--green);font-family:var(--font-b);font-size:13px;letter-spacing:1px;cursor:pointer;padding:10px 18px;border-radius:3px;transition:all 0.2s;}
+.splash-back:hover{border-color:var(--green);color:var(--green);}
 #auth-msg{font-size:13px;color:var(--red);min-height:18px;text-align:center;animation:fadeInDown 1s ease 1.3s both;}
 
 .leaderboard{margin:14px auto 0;max-width:300px;width:100%;text-align:left;max-height:170px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;}
@@ -75,6 +78,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .ctrl-btn{background:none;border:1px solid var(--green-dim);color:var(--green);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:13px;line-height:1;transition:all 0.2s;}
 .ctrl-btn.off{color:var(--muted);border-color:rgba(255,255,255,0.12);}
 .ctrl-btn:hover{border-color:var(--green);}
+/* ─── AUDIO MENU ─── */
+.audio-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;backdrop-filter:blur(2px);}
+.audio-menu-overlay.show{display:flex;align-items:center;justify-content:center;}
+.audio-menu-popup{background:linear-gradient(135deg, rgba(11,28,18,0.95) 0%, rgba(8,20,12,0.97) 100%);border:2px solid var(--green-dim);border-radius:8px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.8), inset 0 1px 0 rgba(139,179,154,0.2);}
+.audio-menu-title{color:var(--green);font-size:16px;font-weight:bold;margin-bottom:20px;text-align:center;text-transform:uppercase;letter-spacing:1px;}
+.audio-menu-item{margin-bottom:16px;}
+.audio-menu-item label{display:block;color:var(--green-dim);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.audio-menu-item input[type="range"]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right, rgba(74,138,90,0.4), rgba(111,179,129,0.6));border-radius:3px;outline:none;cursor:pointer;}
+.audio-menu-item input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg, #6fb381, #4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+.audio-menu-item input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg, #6fb381, #4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+.audio-menu-item span{display:inline-block;float:right;color:var(--green);font-size:11px;margin-top:2px;}
+.audio-menu-close{width:100%;margin-top:16px;padding:10px;background:none;border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.2s;}
+.audio-menu-close:hover{border-color:var(--green);}
 #hp-wrap{width:110px;}
 #hp-bg{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:3px;}
 #hp-fill{height:100%;border-radius:3px;transition:width 0.5s,background 0.5s;width:100%;background:var(--green);}
@@ -100,8 +116,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .ch-text{flex:1;}
 .ch-tag{align-self:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px;border:1px solid rgba(74,222,128,0.25);color:var(--muted);flex-shrink:0;}
 
-#story-wrap{flex:1;overflow-y:auto;display:flex;justify-content:center;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;}
-#story{max-width:760px;width:100%;padding:30px 30px 40px;}
+#story-wrap{flex:1;overflow-y:auto;display:flex;justify-content:center;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;background:linear-gradient(135deg, rgba(11,28,18,0.9) 0%, rgba(8,20,12,0.95) 50%, rgba(5,15,8,0.92) 100%);box-shadow:inset 0 0 80px rgba(0,0,0,0.6);}
+#story-wrap::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 100%, rgba(20,60,35,0.15) 0%, transparent 70%);z-index:0;}
+#story{max-width:760px;width:100%;padding:30px 30px 40px;position:relative;z-index:1;}
 #chap-label{font-size:11px;letter-spacing:4px;color:var(--green);text-transform:uppercase;margin-bottom:16px;border-left:2px solid var(--green-dim);padding-left:10px;}
 #scen-text{font-size:18px;line-height:1.85;color:#d4e8d4;margin-bottom:26px;white-space:pre-wrap;}
 #choices{display:flex;flex-direction:column;gap:11px;}
@@ -119,7 +136,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #loader.show{display:flex;}
 #loader .ring{width:46px;height:46px;border-width:3px;}
 #loader-text{font-family:var(--font-t);font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;animation:flicker 4s infinite;}
-#kb{font-size:10px;letter-spacing:1px;color:var(--muted);text-align:center;padding:6px;flex-shrink:0;opacity:0.45;text-transform:uppercase;}
+#kb{font-size:10px;letter-spacing:1px;color:var(--green);text-align:center;padding:6px;flex-shrink:0;opacity:0.75;text-transform:uppercase;}
 
 /* ─── END ─── */
 #end{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.93);backdrop-filter:blur(14px);flex-direction:column;padding:28px;}
@@ -146,7 +163,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #creator{position:fixed;inset:0;z-index:85;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%, #071a09 0%, #000 70%);padding:24px;overflow-y:auto;}
 #creator.show{display:flex;}
 #creator h2{font-family:var(--font-t);font-size:clamp(20px,4vw,32px);color:var(--green);letter-spacing:4px;margin-bottom:16px;text-transform:uppercase;text-align:center;}
-#char-preview{width:180px;height:250px;margin-bottom:16px;flex-shrink:0;}
+#char-preview{width:280px;height:380px;margin-bottom:16px;flex-shrink:0;}
 #char-preview svg{width:100%;height:100%;}
 .sel-row{display:flex;align-items:center;gap:12px;width:320px;max-width:92vw;margin-bottom:9px;background:rgba(5,15,5,0.6);border:1px solid var(--green-dim);border-radius:8px;padding:8px 12px;}
 .sel-mid{flex:1;text-align:center;}
@@ -154,20 +171,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .sel-val{font-family:var(--font-t);font-size:14px;color:var(--text);}
 .sel-arrow{background:none;border:1px solid var(--green-dim);color:var(--green);width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:18px;line-height:1;transition:all 0.2s;flex-shrink:0;}
 .sel-arrow:hover{background:rgba(74,222,128,0.12);border-color:var(--green);}
-#creator-actions{display:flex;gap:10px;margin-top:14px;align-items:center;}
+#creator-actions{display:flex;gap:12px;margin-top:14px;align-items:center;flex-wrap:wrap;justify-content:center;}
 /* ── Retro ANSI/PETSCII character portrait ── */
 #creator{background:radial-gradient(ellipse at 50% 50%, #021006 0%, #000 75%);}
 #creator-title{font-family:'Courier New',monospace;font-weight:bold;color:#62ffa6;letter-spacing:5px;font-size:15px;margin-bottom:16px;text-shadow:0 0 8px rgba(98,255,166,0.7);text-align:center;}
 #char-preview.pix-frame{position:relative;display:inline-block;width:auto;height:auto;background:#03130a;border:2px solid #1f7a3a;filter:drop-shadow(0 0 10px rgba(98,255,166,0.45));margin-bottom:4px;padding:10px 16px;}
 #char-ascii{font-family:'Courier New',monospace;font-size:15px;line-height:15px;color:#5dffa0;white-space:pre;margin:0;text-shadow:0 0 5px rgba(93,255,160,0.5);}
 /* Real ANSI-art portrait (assets/char/<id>.png). Shown cover-cropped in the CRT frame; falls back to #char-ascii when missing. */
-#char-img{display:none;width:260px;height:360px;object-fit:cover;object-position:center top;image-rendering:pixelated;vertical-align:bottom;}
+#char-img{display:none;width:380px;height:520px;object-fit:contain;object-position:center;image-rendering:pixelated;vertical-align:bottom;}
 #char-preview.has-img #char-ascii{display:none;}
 #char-preview.has-img #char-img{display:block;}
 .npc-ascii{font-family:'Courier New',monospace;font-size:6px;line-height:6px;color:#5dffa0;white-space:pre;margin:0;text-shadow:0 0 3px rgba(93,255,160,0.5);}
 #char-preview.pix-frame::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.30) 0,rgba(0,0,0,0.30) 1px,transparent 1px,transparent 4px);}
 #char-name{font-family:'Courier New',monospace;color:#62ffa6;letter-spacing:2px;font-size:15px;margin:10px 0 2px;text-shadow:0 0 6px rgba(98,255,166,0.6);text-align:center;}
 #creator .sel-val{color:#9affc2;}
+
+/* ─── CAUTION ─── */
+#caution{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:#000;cursor:pointer;transition:opacity 0.6s ease;}
+#caution.hide{opacity:0;pointer-events:none;}
+#caution-box{max-width:480px;width:90%;text-align:center;padding:0 20px;}
+#caution-label{font-family:var(--font-t);font-size:13px;letter-spacing:5px;color:var(--amber);text-transform:uppercase;margin-bottom:20px;}
+#caution-box p{font-size:15px;line-height:1.8;color:rgba(200,216,200,0.65);margin-bottom:32px;}
+#caution-click{font-family:var(--font-t);font-size:11px;letter-spacing:4px;color:rgba(74,222,128,0.5);text-transform:uppercase;animation:cautionPulse 2s ease-in-out infinite;}
+@keyframes cautionPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
 @media(max-width:680px){
   html,body{font-size:16px;}
@@ -184,12 +210,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 </head>
 <body>
 
+<!-- ═══ CAUTION ═══ -->
+<div id="caution">
+  <div id="caution-box">
+    <div id="caution-label">⚠ Content Warning</div>
+    <p>This game contains themes of psychological horror, survival situations, and mature narrative content. It is intended for players comfortable with dark, atmospheric storytelling.</p>
+    <div id="caution-click">Click anywhere to continue</div>
+  </div>
+</div>
+
 <div id="particles"></div>
 <div id="scanlines"></div>
 <div id="trans"></div>
 
 <!-- ═══ SPLASH ═══ -->
 <div id="splash">
+  <button id="home-mute" onclick="playClickSound(); toggleHomeTheme()" onmouseenter="playHoverBeep(event)" title="Mute forest ambience">🔊</button>
   <svg id="splash-trees" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
     <g opacity="0.25" fill="#0d2e0d">
       <polygon points="60,400 90,280 120,400"/><polygon points="200,400 240,220 280,400"/><polygon points="350,400 390,200 430,400"/>
@@ -209,13 +245,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <div class="splash-subtitle">A Psychological Survival Horror — narrated by AI</div>
     <div class="splash-auth">
       <div id="mode-choice">
-        <button class="splash-play" onclick="playAsGuest()">▶ &nbsp; Play as Guest</button>
-        <button class="splash-play splash-alt" onclick="showLogin()">Login with a name</button>
+        <button class="splash-play" onclick="playClickSound(); playAsGuest()" onmouseenter="playHoverBeep(event)">▶ &nbsp; Play as Guest</button>
+        <button class="splash-play splash-alt" onclick="playClickSound(); showLogin()" onmouseenter="playHoverBeep(event)">Login with a name</button>
       </div>
       <div id="login-form">
         <input type="text" id="reg-username" class="auth-input" placeholder="Enter your name" autocomplete="off" onkeydown="if(event.key==='Enter')loginAndPlay()"/>
-        <button class="splash-play" onclick="loginAndPlay()">▶ &nbsp; Begin Survival</button>
-        <button class="splash-back" onclick="hideLogin()">← Back</button>
+        <button class="splash-play" onclick="playClickSound(); loginAndPlay()" onmouseenter="playHoverBeep(event)">▶ &nbsp; Begin Survival</button>
+        <button class="splash-back" onclick="playClickSound(); hideLogin()" onmouseenter="playHoverBeep(event)">← Back</button>
       </div>
     </div>
     <div id="auth-msg"></div>
@@ -237,10 +273,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="creator-title">▓▓ CHOOSE YOUR SURVIVOR ▓▓</div>
   <div id="char-preview" class="pix-frame"><pre id="char-ascii"></pre><img id="char-img" alt=""></div>
   <div id="char-name"></div>
-  <div class="sel-row"><button class="sel-arrow" onclick="cycle(-1)">‹</button><div class="sel-mid"><div class="sel-label">Survivor</div><div class="sel-val" id="sel-class"></div></div><button class="sel-arrow" onclick="cycle(1)">›</button></div>
+  <div class="sel-row"><button class="sel-arrow" onclick="playClickSound(); cycle(-1)" onmouseenter="playHoverBeep(event)">‹</button><div class="sel-mid"><div class="sel-label">Survivor</div><div class="sel-val" id="sel-class"></div></div><button class="sel-arrow" onclick="playClickSound(); cycle(1)" onmouseenter="playHoverBeep(event)">›</button></div>
   <div id="creator-actions">
-    <button class="splash-play" onclick="enterWoods()">▶ &nbsp; Enter the Woods</button>
-    <button class="splash-back" onclick="goToMenu()">← Back</button>
+    <button class="splash-play" onclick="playClickSound(); enterWoods()" onmouseenter="playHoverBeep(event)">▶ &nbsp; Enter the Woods</button>
+    <button class="splash-back" onclick="playClickSound(); goToMenu()" onmouseenter="playHoverBeep(event)">← Back</button>
   </div>
 </div>
 
@@ -249,8 +285,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="topbar">
     <div id="gtitle" onclick="askReturnToMenu()" title="Return to main menu">🌲 Lost In Woods</div>
     <div id="hud">
-      <button class="ctrl-btn off" id="btn-music" onclick="toggleMusic()" title="Toggle music">♪</button>
-      <button class="ctrl-btn off" id="btn-narr" onclick="toggleNarration()" title="Toggle narration">🗣</button>
+      <button class="ctrl-btn off" id="btn-music" onclick="playClickSound(); toggleMusic()" onmouseenter="playHoverBeep(event)" title="Toggle music">♪</button>
+      <button class="ctrl-btn off" id="btn-narr" onclick="playClickSound(); toggleNarration()" onmouseenter="playHoverBeep(event)" title="Toggle narration">🗣</button>
+      <button class="ctrl-btn" id="btn-settings" onclick="playClickSound(); openAudioMenu()" onmouseenter="playHoverBeep(event)" title="Audio settings">⚙️</button>
       <div class="hud-item"><div class="hud-label">Survived</div><div class="hud-val" id="h-events">0</div></div>
       <div class="hud-item"><div class="hud-label">Score</div><div class="hud-val" id="h-score">0</div></div>
       <div class="hud-item">
@@ -274,6 +311,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="kb">Press A · B · C · D to choose</div>
 </div>
 
+<!-- ═══ AUDIO SETTINGS MENU ═══ -->
+<div id="audio-menu" class="audio-menu-overlay">
+  <div class="audio-menu-popup">
+    <div class="audio-menu-title">Audio Settings</div>
+    <div class="audio-menu-item">
+      <label>Music Volume</label>
+      <input type="range" id="vol-music" min="0" max="100" value="100" oninput="updateMusicVolume(this.value)">
+      <span id="vol-music-val">100%</span>
+    </div>
+    <div class="audio-menu-item">
+      <label>Sound FX Volume</label>
+      <input type="range" id="vol-sfx" min="0" max="100" value="100" oninput="updateSfxVolume(this.value)">
+      <span id="vol-sfx-val">100%</span>
+    </div>
+    <button class="audio-menu-close" onclick="playClickSound(); closeAudioMenu()" onmouseenter="playHoverBeep(event)">Close</button>
+  </div>
+</div>
+
 <!-- ═══ END ═══ -->
 <div id="end">
   <div id="end-inner">
@@ -283,7 +338,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <div id="end-score">0</div>
     <div id="end-sl">Final Score</div>
     <div id="end-leaderboard" class="leaderboard"></div>
-    <button id="rbtn" onclick="restart()">Play Again</button>
+    <button id="rbtn" onclick="playClickSound(); restart()" onmouseenter="playHoverBeep(event)">Play Again</button>
   </div>
 </div>
 
@@ -296,8 +351,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <div id="confirm-title">Abandon this run?</div>
     <div id="confirm-text">Returning to the main menu ends your current playthrough — this story's progress will be lost.</div>
     <div id="confirm-actions">
-      <button class="splash-play" onclick="cancelReturn()">Keep Playing</button>
-      <button class="splash-play splash-alt" onclick="confirmReturn()">Return to Menu</button>
+      <button class="splash-play" onclick="playClickSound(); cancelReturn()" onmouseenter="playHoverBeep(event)">Keep Playing</button>
+      <button class="splash-play splash-alt" onclick="playClickSound(); confirmReturn()" onmouseenter="playHoverBeep(event)">Return to Menu</button>
     </div>
   </div>
 </div>
@@ -322,24 +377,43 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<
 async function errMsg(res){ try{ const j=await res.json(); return j.message || ('HTTP '+res.status); }catch(_){ return 'HTTP '+res.status; } }
 
 // ─── AUDIO & NARRATION (Epic 10) ───
-let audioOn=false, narrationOn=false, audioCtx=null, ambient=null;
+let audioOn=false, narrationOn=false, audioCtx=null, ambient=null, uiMaster=null, audioInitialized=false, homeAmbient=null, homeAudioOn=true;
 let currentScene='dense_forest', sceneTimer=null;
 let sceneTarget = {base:90, filter:1000, noise:0.06};
+let musicVolume = 1.0, sfxVolume = 1.0;
+let lastHoverBeepTime = {};
 // Per-location soundscape: drone pitch/filter/wind PLUS the ambient one-shots
 // ("events") that make each place clearly distinct.
 const AUDIO_SCENES = {
-  dense_forest:{base:90,  filter:1000, noise:0.06, events:['hoot','creak','rustle']},
-  clearing:    {base:110, filter:1500, noise:0.07, events:['chirp','hoot','gust']},
-  swamp:       {base:70,  filter:600,  noise:0.10, events:['croak','drip','croak']},
+  dense_forest:{base:90,  filter:1000, noise:0.06, events:['hoot','creak','rustle','cricket','crow']},
+  clearing:    {base:110, filter:1500, noise:0.07, events:['chirp','hoot','gust','cricket']},
+  swamp:       {base:70,  filter:600,  noise:0.10, events:['croak','drip','croak','cricket']},
   cliff:       {base:100, filter:1800, noise:0.16, events:['gust','gust','whistle']},
   stream:      {base:115, filter:2600, noise:0.20, events:['drip','rustle']},
   pond:        {base:95,  filter:1100, noise:0.07, events:['drip','croak']},
   cave:        {base:60,  filter:500,  noise:0.05, events:['drip','drip','rumble']}
 };
 function ensureCtx(){
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended') audioCtx.resume();
+  if(!audioCtx) {
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') {
+      audioCtx.resume().catch(e=>console.log('Resume failed:', e));
+    }
+  }
+  if(!uiMaster && audioCtx) { 
+    uiMaster = audioCtx.createGain(); 
+    uiMaster.connect(audioCtx.destination); 
+    uiMaster.gain.value = 0.5; 
+  }
   return audioCtx;
+}
+function initAudio(){
+  if(audioInitialized){
+    if(audioCtx && audioCtx.state==='suspended') audioCtx.resume().catch(()=>{});
+    return;
+  }
+  audioInitialized = true;
+  ensureCtx();
 }
 function startAmbient(){
   const ctx = ensureCtx(); if(ambient) return;
@@ -352,7 +426,7 @@ function startAmbient(){
   const noise = ctx.createBufferSource(); noise.buffer=buf; noise.loop=true; const nf=ctx.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=900; const noiseGain=ctx.createGain(); noiseGain.gain.value=sceneTarget.noise; noise.connect(nf); nf.connect(noiseGain); noiseGain.connect(master); noise.start();
   const heart=ctx.createOscillator(); heart.type='sine'; heart.frequency.value=44; const heartGain=ctx.createGain(); heartGain.gain.value=0; heart.connect(heartGain); heartGain.connect(master); heart.start();
   const hlfo=ctx.createOscillator(); hlfo.type='sine'; hlfo.frequency.value=1.1; const hDepth=ctx.createGain(); hDepth.gain.value=0; hlfo.connect(hDepth); hDepth.connect(heartGain.gain); hlfo.start();
-  master.gain.linearRampToValueAtTime(0.32, ctx.currentTime+1.5);
+  master.gain.linearRampToValueAtTime(0.32 * musicVolume, ctx.currentTime+1.5);
   ambient = {master, filt, oscs, ratios, lfo, noise, noiseGain, hDepth};
   startScheduler();
 }
@@ -398,9 +472,53 @@ function playEvent(name){
     case 'rumble':  tone('sine', 52, 38, 1.60, 0.11); break;
     case 'creak':   tone('sawtooth', 170, 120, 0.70, 0.045, 'lowpass', 380); break;
     case 'rustle':  noiseBurst('highpass', 1800, 0.05, 0.05, 0.30); break;
+    case 'cricket': noiseBurst('highpass', 3500, 0.03, 0.1, 0.50); break;
+    case 'crow':    if(Math.random()<0.08) { tone('sawtooth', 380, 280, 0.35, 0.08, 'lowpass', 800); setTimeout(()=>tone('sawtooth',420,310,0.32,0.07,'lowpass',850),200); } break;
   }
 }
-function toggleMusic(){ audioOn=!audioOn; if(audioOn){ startAmbient(); setAudioScene(G.location, G.hp); } else stopAmbient(); document.getElementById('btn-music').classList.toggle('off', !audioOn); }
+function updateMusicVolume(val){ musicVolume = parseFloat(val) / 100; if(ambient && ambient.master) { ambient.master.gain.value = 0.32 * musicVolume; } document.getElementById('vol-music-val').textContent = val + '%'; }
+function updateSfxVolume(val){ sfxVolume = parseFloat(val) / 100; document.getElementById('vol-sfx-val').textContent = val + '%'; }
+function openAudioMenu(){ document.getElementById('audio-menu').classList.add('show'); }
+function closeAudioMenu(){ document.getElementById('audio-menu').classList.remove('show'); }
+function playHoverBeep(e){ initAudio(); const id = e.target.id || e.target.className; const now = Date.now(); if((lastHoverBeepTime[id] || 0) + 120 > now) return; lastHoverBeepTime[id] = now; if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=620; const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12*sfxVolume, t+0.008); g.gain.exponentialRampToValueAtTime(0.0001, t+0.06); const dest = ambient?.master || uiMaster; o.connect(g); g.connect(dest); o.start(t); o.stop(t+0.1); }
+function playClickSound(){ initAudio(); if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(880, t); o.frequency.exponentialRampToValueAtTime(440, t+0.12); const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16*sfxVolume, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+0.12); const dest = ambient?.master || uiMaster; o.connect(g); g.connect(dest); o.start(t); o.stop(t+0.15); }
+function startHomeTheme(){
+  if(homeAmbient) return;
+  initAudio();
+  const ctx = ensureCtx(); 
+  const master = ctx.createGain(); master.gain.value = homeAudioOn ? 0.22 : 0;
+  master.connect(ctx.destination);
+  const filt = ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=320; filt.connect(master);
+  const oscs = [], ratios = [0.5, 1, 1.5];
+  ratios.forEach(r => {
+    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=40*r; o.connect(filt);
+    oscs.push(o);
+  });
+  const lfo = ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.3;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 80;
+  lfo.connect(lfoGain);
+  oscs.forEach(o => lfoGain.connect(o.frequency));
+  oscs.forEach(o => o.start());
+  lfo.start();
+  const noise = ctx.createBufferSource(); const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const data = buf.getChannelData(0); for(let i=0; i<buf.length; i++) data[i] = Math.random()*2-1;
+  noise.buffer = buf; noise.loop = true; noise.start();
+  const noiseGain = ctx.createGain(); noiseGain.gain.value = 0.04;
+  noise.connect(noiseGain); noiseGain.connect(filt);
+  homeAmbient = {master, filt, oscs, lfo, noise, noiseGain};
+}
+function stopHomeTheme(){
+  if(!homeAmbient) return;
+  const a = homeAmbient; homeAmbient = null;
+  try{ a.master.gain.linearRampToValueAtTime(0, ensureCtx().currentTime+0.5); }catch(e){}
+  setTimeout(()=>{ try{ a.oscs.forEach(o=>o.stop()); a.lfo.stop(); a.noise.stop(); }catch(e){} }, 550);
+}
+function toggleHomeTheme(){
+  homeAudioOn = !homeAudioOn;
+  if(homeAmbient) homeAmbient.master.gain.linearRampToValueAtTime(homeAudioOn?0.22:0, ensureCtx().currentTime+0.3);
+  document.getElementById('home-mute').classList.toggle('muted', !homeAudioOn);
+}
+function toggleMusic(){ audioOn=!audioOn; if(audioOn){ ensureCtx(); startAmbient(); setAudioScene(G.location, G.hp); } else stopAmbient(); document.getElementById('btn-music').classList.toggle('off', !audioOn); }
 function toggleNarration(){ narrationOn=!narrationOn; document.getElementById('btn-narr').classList.toggle('off', !narrationOn); if(!narrationOn){ try{window.speechSynthesis.cancel();}catch(e){} } else { narrate(G.lastNarrative); } }
 function narrate(text){ if(!narrationOn || !text || !('speechSynthesis' in window)) return; try{ const s=window.speechSynthesis; s.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=0.95; u.pitch=0.8; s.speak(u); }catch(e){} }
 
@@ -612,12 +730,14 @@ function showCreator(){
   renderChar();
 }
 function enterWoods(){
+  stopHomeTheme();
   const p = PRESETS[PRESET_I];
   G.appearance = { character: p.name + ', ' + p.desc };
   document.getElementById('creator').classList.remove('show');
   document.getElementById('game').style.display='flex';
   // Auto-start ambient music (this click satisfies the browser autoplay gate).
   if(!audioOn){ audioOn=true; startAmbient(); document.getElementById('btn-music').classList.remove('off'); }
+  setupTypewriterSkip();
   beginStory();
 }
 
@@ -639,6 +759,7 @@ async function beginStory(){
 }
 
 async function choose(idx){
+  playClickSound();
   if(G.busy) return;
   const c = G.choices[idx];
   if(!c) return;
@@ -825,6 +946,40 @@ function setSceneArt(loc, narrative){
   img.src = url;
 }
 
+let typewriterTimeout = null;
+let typewriterSkipped = false;
+function typewriteText(element, text, speed = 50) { // change speed if u need it 
+  typewriterSkipped = false;
+  element.textContent = '';
+  clearTimeout(typewriterTimeout);
+  let i = 0;
+  function type() {
+    if (typewriterSkipped) {
+      element.textContent = text;
+      return;
+    }
+    if (i < text.length) {
+      element.textContent += text.charAt(i++);
+      typewriterTimeout = setTimeout(type, speed);
+    }
+  }
+  type();
+}
+function skipTypewriter(element, text) {
+  typewriterSkipped = true;
+  clearTimeout(typewriterTimeout);
+  element.textContent = text;
+}
+function setupTypewriterSkip() {
+  const storyEl = document.getElementById('story');
+  storyEl.addEventListener('click', () => {
+    if (!typewriterSkipped && typewriterTimeout) {
+      const scenEl = document.getElementById('scen-text');
+      skipTypewriter(scenEl, G.lastNarrative);
+    }
+  });
+}
+
 function renderBeat(data){
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
   G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||'';
@@ -841,11 +996,11 @@ function renderBeat(data){
   if(data.gameOver){ showEnd(data); return; }
 
   document.getElementById('chap-label').textContent = locationName(data.location);
-  document.getElementById('scen-text').textContent = data.narrative || '';
+  typewriteText(document.getElementById('scen-text'), data.narrative || '', 25);
   narrate(data.narrative);
   const keys = ['A','B','C','D'];
   document.getElementById('choices').innerHTML = G.choices.map((c,i)=>
-    `<button class="ch" id="ch${i}" onclick="choose(${i})"><span class="ch-key">${keys[i]||'•'}</span><span class="ch-text">${escapeHtml(c.text)}</span></button>`
+    `<button class="ch" id="ch${i}" onclick="playClickSound(); choose(${i})" onmouseenter="playHoverBeep(event)"><span class="ch-key">${keys[i]||'•'}</span><span class="ch-text">${escapeHtml(c.text)}</span></button>`
   ).join('');
   document.getElementById('story-wrap').scrollTop = 0;
 }
@@ -904,6 +1059,9 @@ function askReturnToMenu(){ document.getElementById('confirm').classList.add('sh
 function cancelReturn(){ document.getElementById('confirm').classList.remove('show'); }
 function confirmReturn(){ document.getElementById('confirm').classList.remove('show'); goToMenu(); }
 function goToMenu(){
+  stopAmbient();
+  audioOn = false;
+  document.getElementById('btn-music').classList.add('off');
   document.getElementById('game').style.display='none';
   document.getElementById('end').classList.remove('show');
   document.getElementById('creator').classList.remove('show');
@@ -913,6 +1071,7 @@ function goToMenu(){
   splash.style.opacity='1';
   hideLogin();
   document.getElementById('auth-msg').textContent='';
+  startHomeTheme();
   // Drop the abandoned run's state.
   G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, busy:false, startEndpoint:'/auth/guest', startName:null };
   loadLeaderboard('splash-leaderboard');
@@ -956,6 +1115,14 @@ document.addEventListener('keydown',e=>{
 
 // Show the leaderboard on the splash as soon as the page loads.
 loadLeaderboard('splash-leaderboard');
+
+// Caution screen — dismissing it counts as the user gesture that unlocks audio autoplay.
+document.getElementById('caution').addEventListener('click', function dismissCaution(){
+  this.removeEventListener('click', dismissCaution);
+  this.classList.add('hide');
+  setTimeout(()=>{ this.style.display='none'; }, 650);
+  startHomeTheme();
+});
 </script>
 </body>
 </html>
