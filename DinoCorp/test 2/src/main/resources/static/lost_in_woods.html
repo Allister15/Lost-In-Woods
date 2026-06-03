@@ -89,6 +89,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #scene-art .env-ansi{font-family:'Courier New',monospace;font-size:9px;line-height:9px;color:#3fcf6a;white-space:pre;margin:0;padding:6px 10px;overflow:hidden;text-shadow:0 0 4px rgba(63,207,106,0.4);}
 #npc-panel{display:none;align-items:center;gap:12px;margin-bottom:14px;background:rgba(8,18,8,0.6);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
 .npc-portrait{width:56px;height:56px;border-radius:6px;background:#03130a center/cover no-repeat;border:1px solid var(--green-dim);display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-t);font-size:18px;flex-shrink:0;box-shadow:0 0 8px rgba(74,222,128,0.25);}
+.npc-img{height:84px;width:auto;max-width:92px;object-fit:contain;object-position:center bottom;image-rendering:pixelated;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(98,255,166,0.4));}
+/* Demon form is never a jump-cut: it surfaces slowly, sickly green -> violet glow. */
+@keyframes demonReveal{0%{opacity:0;transform:scale(0.96);filter:saturate(0.25) brightness(0.5) drop-shadow(0 0 0 rgba(160,90,200,0));}60%{opacity:1;}100%{opacity:1;transform:scale(1);filter:saturate(1) brightness(1) drop-shadow(0 0 12px rgba(168,92,210,0.6));}}
+.npc-img.demon{animation:demonReveal 2.2s ease-in both;}
 .npc-name{font-family:var(--font-t);font-size:13px;letter-spacing:2px;color:var(--green);}
 #inv-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
 .inv-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:2px;}
@@ -478,7 +482,13 @@ const ANSI_FIG = {
   nagi:{gear:'hood',   build:'avg',  coat:'short',prop:'none'},
   vincent:{gear:'slick',build:'avg', coat:'short',prop:'none'},
   sammuel:{gear:'hair',build:'round',coat:'short',prop:'can'},
-  adam:{gear:'slick',  build:'avg',  coat:'long', prop:'none'}
+  adam:{gear:'slick',  build:'avg',  coat:'long', prop:'none'},
+  // Non-sin NPCs (capped roster). These get a built-in green silhouette until real
+  // art is dropped in at assets/npc/<key>.png, which then loads automatically.
+  ghost:{gear:'hood',  build:'thin', coat:'long', prop:'none'},
+  dwarf:{gear:'cap',   build:'round',coat:'short',prop:'none'},
+  transformed_man:{gear:'hair',build:'broad',coat:'short',prop:'none'},
+  seeker:{gear:'hood', build:'thin', coat:'long', prop:'staff'}
 };
 const SHADE=[' ','░','▒','█'];
 function buildAnsi(id){
@@ -675,15 +685,60 @@ function renderInventory(items, elId){
 const NPC_NAMES = {
   banner:'Banner · Wrath', yuri:'Yuri · Envy', felicia:'Felicia · Greed', nagi:'Nagi · Sloth',
   vincent:'Vincent · Lust', sammuel:'Sammuel · Gluttony', adam:'Adam · Pride',
-  hunter:'A Hunter', grandma:'A Grandmother', peddler:'A Peddler', ghost:'A Ghost', dwarf:'A Dwarf', werewolf:'A Werewolf'
+  ghost:'A Ghost', dwarf:'A Dwarf', transformed_man:'The Transformed Man', seeker:'The Seeker'
 };
-function renderNpc(id){
+// ── The 7 Sins: real ANSI-art sprites with base / stance / demon-form tiers ──
+// COMBAT keywords trigger each sin's "attacking" stance; the rest are sin-specific.
+// Priority is top-to-bottom; first keyword hit wins, else the base form is used.
+const COMBAT = ['attack','lunge','charge','strike','swing','grab','claw','blade','knife','hatchet','axe','blood','slash','pounce','rush','throat','seize'];
+const NPC_STANCES = {
+  adam:[['attacking',COMBAT],['spiteful',['spite','sneer','contempt','mock','disdain','scorn','betray','condescend']],['pushing',['push','shove','force','drive you','herd','press']],['grinning',['grin','smile','smirk','charming','laugh','chuckle']],['relaxed',['calm','casual','leisure','reclin','ease','lean','idle','saunter']]],
+  banner:[['attacking',COMBAT],['rage',['rage','fury','furious','snarl','roar','seethe','enraged','wild','berserk']],['resentment',['resent','grudge','bitter','glare','simmer','brood']],['grinning',['grin','smile','smirk','laugh','sneer']]],
+  felicia:[['attacking',COMBAT.concat(['snatch','steal','rob','clutch'])],['crying',['cry','sob','tears','weep','wail']],['sad',['sad','sorrow','mourn','forlorn','downcast','grief','despair']],['kind',['kind','gentle','smile','warm','help','soft','sooth','friendly','tender']]],
+  nagi:[['attacking',COMBAT],['drowsy',['drowsy','sleep','yawn','sluggish','heavy-lidded','tired','slow','doze']],['dragging',['drag','haul','pull','deadweight','slump','trudge','lug']],['fullvoid',['void','empty','hollow','blank','nothing','abyss','vacant','numb']]],
+  sammuel:[['attacking',COMBAT],['gorging',['gorge','devour','eat','chew','feast','swallow','mouthful','ration','bite','gulp']],['hoarding',['hoard','stash','pocket','clutch','collect','greedy','grasp']],['ecstacy',['ecstasy','ecstatic','bliss','rapture','delight','euphor','moan']],['hollow',['hollow','empty','gaunt','starv','sallow','famish']]],
+  vincent:[['attacking',COMBAT],['predator',['predator','stalk','prowl','hunt','circle','closing in','corner']],['possessive',['possess','mine','grip','claim','cling','obsess','own']],['seductive',['seduc','charm','allure','whisper','sweet','tempt','smile','beckon']],['rapturous',['rapture','rapturous','ecstasy','bliss','fervor','enthrall']]],
+  yuri:[['attacking',COMBAT],['sneering',['sneer','scorn','mock','contempt','curl','jeer']],['covetous',['covet','envy','want','desire','crave','yearn','jealous','long for']],['resentful',['resent','bitter','grudge','spite']],['brooding',['brood','sulk','lurk','shadow','watch','stare','silent','linger']]],
+};
+const NPC_DEMON = new Set(['adam','banner','felicia','nagi','sammuel','vincent','yuri']);
+// DemonForm is RESTRICTED to late-game ending events (never on a normal "continue" beat, and not on plain death).
+const DEMON_OUTCOMES = new Set(['escape','transformation','lost','secret']);
+const NPC_IMG_CACHE = {};
+
+// Pick which sprite file fits THIS scene — instant, local, no API.
+function npcArtUrl(id, narrative, outcome){
+  if(NPC_DEMON.has(id) && DEMON_OUTCOMES.has((outcome||'').toLowerCase())) return `assets/npc/${id}_demon.png`;
+  const t = (narrative||'').toLowerCase();
+  for(const [stance, kw] of (NPC_STANCES[id]||[])){ if(kw.some(w=>t.includes(w))) return `assets/npc/${id}_${stance}.png`; }
+  return `assets/npc/${id}.png`; // base form
+}
+// Preload the 7 base forms so a sin appears the instant it enters a scene.
+function preloadNpcArt(){
+  for(const id of NPC_DEMON){
+    const url = `assets/npc/${id}.png`;
+    if(NPC_IMG_CACHE[url] !== undefined) continue;
+    const im = new Image(); im.onload=()=>{NPC_IMG_CACHE[url]=true;}; im.onerror=()=>{NPC_IMG_CACHE[url]=false;}; im.src=url;
+  }
+}
+preloadNpcArt();
+
+function renderNpc(id, narrative, outcome){
   const panel = document.getElementById('npc-panel');
   id = (id||'').toLowerCase().trim();
   if(!id || !NPC_NAMES[id]){ panel.style.display='none'; panel.innerHTML=''; return; }
   panel.style.display='flex';
-  const art = ANSI_FIG[id] ? `<pre class="npc-ascii">${escapeHtml(buildAnsi(id))}</pre>` : `<div class="npc-portrait">?</div>`;
-  panel.innerHTML = art + `<div class="npc-name">${escapeHtml(NPC_NAMES[id])}</div>`;
+  const name = `<div class="npc-name">${escapeHtml(NPC_NAMES[id])}</div>`;
+  const fallback = ANSI_FIG[id] ? `<pre class="npc-ascii">${escapeHtml(buildAnsi(id))}</pre>` : `<div class="npc-portrait">?</div>`;
+  const url = npcArtUrl(id, narrative, outcome);
+  const cls = url.endsWith('_demon.png') ? 'npc-img demon' : 'npc-img'; // demon form fades in gradually
+  if(NPC_IMG_CACHE[url] === true){ panel.innerHTML = `<img class="${cls}" alt="" src="${url}">` + name; return; }
+  if(NPC_IMG_CACHE[url] === false){ panel.innerHTML = fallback + name; return; }
+  // Unknown yet: show the green fallback now, probe, and swap in the art when ready (if still this scene).
+  panel.innerHTML = fallback + name;
+  const probe = new Image();
+  probe.onload = ()=>{ NPC_IMG_CACHE[url]=true; if((G.npc||'')===id && npcArtUrl(G.npc, G.lastNarrative, G.lastOutcome)===url){ panel.innerHTML = `<img class="${cls}" alt="" src="${url}">` + name; } };
+  probe.onerror = ()=>{ NPC_IMG_CACHE[url]=false; };
+  probe.src = url;
 }
 
 // ─── FOREST LOCATIONS (geometric 2D visuals) ───
@@ -772,7 +827,7 @@ function setSceneArt(loc, narrative){
 
 function renderBeat(data){
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
-  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||'';
+  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||'';
   document.getElementById('h-score').textContent = data.score;
   document.getElementById('h-events').textContent = data.eventsSurvived;
   updateHp(data.hp);
@@ -780,7 +835,7 @@ function renderBeat(data){
   renderInventory(G.items, 'inv-row');
   setSceneArt(data.location, data.narrative);
   setAudioScene(data.location, data.hp);
-  renderNpc(data.npc);
+  renderNpc(data.npc, data.narrative, data.outcome);
 
   G.lastNarrative = data.narrative || '';
   if(data.gameOver){ showEnd(data); return; }

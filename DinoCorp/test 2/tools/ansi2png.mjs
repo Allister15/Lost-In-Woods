@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
+import { pathToFileURL } from 'node:url';
 
 const SRC = process.argv[2];
 const OUT_DIR = process.argv[3];
@@ -86,33 +87,44 @@ function parse(text) {
   return { rows, width, height: rows.length };
 }
 
-function convert(file) {
-  const text = fs.readFileSync(file, 'utf8');
+// Rasterize one ANSI-art .txt to a PNG at an explicit output path.
+//   opaque=true  -> RGB, glyph color composited over `bg` (full-bleed backgrounds)
+//   opaque=false -> RGBA, alpha = glyph ink coverage (transparent sprites)
+export function rasterizeFile(srcPath, outPath, { opaque = false, bg = [5, 13, 5] } = {}) {
+  const text = fs.readFileSync(srcPath, 'utf8');
   const { rows, width, height } = parse(text);
-  const ch = OPAQUE ? 3 : 4;
+  const ch = opaque ? 3 : 4;
   const pix = Buffer.alloc(width * height * ch);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const cell = rows[y][x];
       const i = (y * width + x) * ch;
       const cov = cell ? Math.pow(cell.cov, 0.7) : 0; // gamma lift faint glyphs
-      if (OPAQUE) {
-        // composite glyph color over the panel background -> full-bleed scene
-        pix[i] = Math.round((cell ? cell.r : 0) * cov + BG[0] * (1 - cov));
-        pix[i + 1] = Math.round((cell ? cell.g : 0) * cov + BG[1] * (1 - cov));
-        pix[i + 2] = Math.round((cell ? cell.b : 0) * cov + BG[2] * (1 - cov));
+      if (opaque) {
+        pix[i] = Math.round((cell ? cell.r : 0) * cov + bg[0] * (1 - cov));
+        pix[i + 1] = Math.round((cell ? cell.g : 0) * cov + bg[1] * (1 - cov));
+        pix[i + 2] = Math.round((cell ? cell.b : 0) * cov + bg[2] * (1 - cov));
       } else if (cell) {
         pix[i] = cell.r; pix[i + 1] = cell.g; pix[i + 2] = cell.b; pix[i + 3] = Math.round(255 * cov);
       } // else fully transparent (already zeroed)
     }
   }
-  const id = path.basename(file, path.extname(file)).toLowerCase();
-  const out = path.join(OUT_DIR, id + '.png');
-  writePng(out, width, height, pix, ch);
-  console.log(`${path.basename(file)} -> ${out}  (${width}x${height})`);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  writePng(outPath, width, height, pix, ch);
+  return { width, height };
 }
 
-fs.mkdirSync(OUT_DIR, { recursive: true });
-for (const f of fs.readdirSync(SRC).filter(x => x.endsWith('.txt')).sort()) {
-  convert(path.join(SRC, f));
+// CLI: convert every .txt in SRC -> OUT_DIR/<basename>.png
+function main() {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  for (const f of fs.readdirSync(SRC).filter(x => x.endsWith('.txt')).sort()) {
+    const out = path.join(OUT_DIR, path.basename(f, path.extname(f)).toLowerCase() + '.png');
+    const { width, height } = rasterizeFile(path.join(SRC, f), out, { opaque: OPAQUE, bg: BG });
+    console.log(`${f} -> ${out}  (${width}x${height})`);
+  }
+}
+
+// Only run the directory loop when invoked directly (not when imported).
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
 }
