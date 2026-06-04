@@ -106,9 +106,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .audio-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .audio-label{color:var(--green-dim);font-size:calc(12px * var(--text-scale));text-transform:uppercase;letter-spacing:0.5px;}
 .audio-val{color:var(--green);font-size:calc(11px * var(--text-scale));}
-#audio-tab-audio input[type="range"],#audio-tab-narration input[type="range"],#audio-tab-display input[type="range"]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,rgba(74,138,90,0.4),rgba(111,179,129,0.6));border-radius:3px;outline:none;cursor:pointer;margin-bottom:14px;}
-#audio-tab-audio input[type="range"]::-webkit-slider-thumb,#audio-tab-narration input[type="range"]::-webkit-slider-thumb,#audio-tab-display input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
-#audio-tab-audio input[type="range"]::-moz-range-thumb,#audio-tab-narration input[type="range"]::-moz-range-thumb,#audio-tab-display input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+#audio-tab-audio input[type="range"],#audio-tab-narration input[type="range"],#audio-tab-display input[type="range"]{width:100%;height:22px;-webkit-appearance:none;appearance:none;background:transparent;outline:none;cursor:pointer;margin-bottom:14px;touch-action:manipulation;}
+#audio-tab-audio input[type="range"]::-webkit-slider-runnable-track,#audio-tab-narration input[type="range"]::-webkit-slider-runnable-track,#audio-tab-display input[type="range"]::-webkit-slider-runnable-track{height:5px;background:linear-gradient(to right,rgba(74,138,90,0.4),rgba(111,179,129,0.6));border-radius:3px;}
+#audio-tab-audio input[type="range"]::-moz-range-track,#audio-tab-narration input[type="range"]::-moz-range-track,#audio-tab-display input[type="range"]::-moz-range-track{height:5px;background:linear-gradient(to right,rgba(74,138,90,0.4),rgba(111,179,129,0.6));border-radius:3px;}
+#audio-tab-audio input[type="range"]::-webkit-slider-thumb,#audio-tab-narration input[type="range"]::-webkit-slider-thumb,#audio-tab-display input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);margin-top:-7px;}
+#audio-tab-audio input[type="range"]::-moz-range-thumb,#audio-tab-narration input[type="range"]::-moz-range-thumb,#audio-tab-display input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
 .audio-narr-apply{width:100%;margin-top:8px;padding:9px;background:rgba(74,222,128,0.08);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.2s;}
 .audio-narr-apply:hover{border-color:var(--green);background:rgba(74,222,128,0.14);}
 .audio-menu-popup{background:linear-gradient(135deg, rgba(11,28,18,0.95) 0%, rgba(8,20,12,0.97) 100%);border:2px solid var(--green-dim);border-radius:8px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.8), inset 0 1px 0 rgba(139,179,154,0.2);}
@@ -704,7 +706,7 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<
 async function errMsg(res){ try{ const j=await res.json(); return j.message || ('HTTP '+res.status); }catch(_){ return 'HTTP '+res.status; } }
 
 // ─── AUDIO & NARRATION (Epic 10) ───
-let audioOn=false, narrationOn=false, audioCtx=null, ambient=null, uiMaster=null, audioInitialized=false, homeAmbient=null, homeAudioOn=true, booAudio=null;
+let audioOn=false, narrationOn=false, audioCtx=null, ambient=null, uiMaster=null, audioInitialized=false, homeAmbient=null, homeAudioOn=true, booAudio=null, hateAudio=null;
 let currentScene='dense_forest', sceneTimer=null;
 let sceneTarget = {base:90, filter:1000, noise:0.06};
 let musicVolume = 1.0, sfxVolume = 1.0, masterVolume = 1.0;
@@ -745,6 +747,7 @@ function initAudio(){
 }
 function startAmbient(){
   const ctx = ensureCtx(); if(ambient) return;
+  if(ctx.state === 'suspended'){ ctx.resume().then(()=>{ if(!ambient) startAmbient(); }).catch(()=>{}); return; }
   const master = ctx.createGain(); master.gain.value=0; master.connect(ctx.destination);
   const filt = ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=sceneTarget.filter; filt.connect(master);
   const ratios=[1,1.5,2];
@@ -1028,7 +1031,9 @@ function startLocAudio(src){
   const a = new Audio(src);
   a.loop = true; a.volume = 0;
   curLocAudio = a; curLocSrc = src;
-  a.play().catch(()=>{});
+  const doPlay = () => a.play().catch(()=>{});
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().then(doPlay).catch(doPlay);
+  else doPlay();
   _fadeAudio(a, Math.min(1, LOC_AUDIO_VOL * masterVolume * musicVolume), 1200);
 }
 
@@ -1044,7 +1049,9 @@ function startMoveAudio(src){
   a.loop = true;
   a.volume = Math.min(1, MOVE_AUDIO_VOL * sfxVolume * masterVolume);
   curMoveAudio = a;
-  a.play().catch(()=>{});
+  const doPlay = () => a.play().catch(()=>{});
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().then(doPlay).catch(doPlay);
+  else doPlay();
 }
 
 function getLocTrack(loc){ return LOCATION_TRACK_MAP[(loc||'').toLowerCase()] || null; }
@@ -1095,6 +1102,10 @@ async function loginAndPlay(){
   // Easter egg: H.D username gets PDF trait and plays boo sound after loading
   if(name.toUpperCase() === 'H.D') {
     G.easterEggPDF = true;
+  }
+  // Easter egg: AM username gets a red AM attribute (cosmetic only)
+  if(name.toUpperCase() === 'AM') {
+    G.easterEggAM = true;
   }
   G.startEndpoint='/auth/login'; G.startName=name;
   await join();
@@ -1462,10 +1473,11 @@ function renderTraits(traits, elId){
   if(!el) return;
   el.innerHTML = (traits||[]).map(t=>`<span class="trait ${t.bad?'bad':'good'}">${escapeHtml(t.name)}</span>`).join('');
 }
-const FOOD_KW = ['berr','mushroom','ration','food','bread','meat','fruit','apple','sandwich','jerky','nut','seed','fungi','herb','plant','cracker','bar'];
+const TOOL_KW  = ['crowbar','knife','blade','bow','compass','mirror','key','torch','lantern','staff','rope','map','hatchet','axe','sword','hammer','shovel','pickaxe','crowbar'];
+const FOOD_KW  = ['berr','mushroom','ration','food','bread','meat','fruit','apple','sandwich','jerky','nut','seed','fungi','herb','plant','cracker','bar'];
 const DRINK_KW = ['water','flask','bottle','canteen','liquid','juice','soup','broth','potion','drink','stream','vial'];
-const HEAL_KW = ['bandage','splint','poultice','salve','ointment','compress','tourniquet','dressing'];
-function getItemVerb(item){ const l=item.toLowerCase(); if(DRINK_KW.some(k=>l.includes(k))) return 'drink'; if(FOOD_KW.some(k=>l.includes(k))) return 'eat'; if(HEAL_KW.some(k=>l.includes(k))) return 'heal'; return null; }
+const HEAL_KW  = ['bandage','splint','poultice','salve','ointment','compress','tourniquet','dressing'];
+function getItemVerb(item){ const l=item.toLowerCase(); if(TOOL_KW.some(k=>l.includes(k))) return null; if(DRINK_KW.some(k=>l.includes(k))) return 'drink'; if(FOOD_KW.some(k=>l.includes(k))) return 'eat'; if(HEAL_KW.some(k=>l.includes(k))) return 'heal'; return null; }
 
 function renderInventory(items, elId){
   const el = document.getElementById(elId);
@@ -1770,8 +1782,20 @@ function renderBeat(data){
   if(G.easterEggPDF && !G.easterEggPDFAdded) {
     G.traits.unshift({name: '!! PDF !!', bad: true});
     G.easterEggPDFAdded = true;
-    // Keep only 6 traits max
     if(G.traits.length > 6) G.traits = G.traits.slice(0, 6);
+  }
+  // Easter egg: AM login — pin a red AM attribute every beat (cosmetic, no effect)
+  if(G.easterEggAM) {
+    G.traits = G.traits.filter(t => t.name !== 'AM');
+    G.traits.unshift({name: 'AM', bad: true});
+    if(G.traits.length > 6) G.traits = G.traits.slice(0, 6);
+  }
+  // Easter egg: score 387+ plays hate.mp3 once
+  if(data.score >= 387 && !G.hateAudioTriggered) {
+    G.hateAudioTriggered = true;
+    hateAudio = new Audio('music/hate.mp3');
+    hateAudio.volume = Math.min(1, masterVolume * musicVolume);
+    hateAudio.play().catch(()=>{});
   }
   G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||''; G.lastStance=(data.stance||'').toLowerCase().trim(); G.lastSurvivorStance=(data.survivorStance||'').toLowerCase().trim();
   document.getElementById('h-score').textContent = data.score;
@@ -1892,6 +1916,7 @@ function freshGameState(keepIdentity){
     npc:'', lastOutcome:'', lastStance:'', lastSurvivorStance:'',
     survivorId:null, survivorName:'', startItems:[],
     godIsComingActive:false,
+    easterEggAM: false, hateAudioTriggered: false,
   };
 }
 // "Play Again" — wipe the run's state and ALWAYS route back to character selection
@@ -1935,6 +1960,7 @@ function goToMenu(){
   stopMoveAudio(true);
   updateDangerVignette(100);
   if(booAudio) { try { booAudio.pause(); booAudio = null; } catch(e){} }
+  if(hateAudio) { try { hateAudio.pause(); hateAudio = null; } catch(e){} }
   audioOn = false;
   document.getElementById('btn-music').classList.add('off');
   document.getElementById('game').style.display='none';
@@ -1988,6 +2014,13 @@ document.addEventListener('keydown',e=>{
     const map={a:0,b:1,c:2,d:3};
     const k=e.key.toLowerCase();
     if(k in map && map[k] < G.choices.length) choose(map[k]);
+  }
+});
+
+// Resume AudioContext when tab/app becomes visible again (critical on mobile — iOS suspends it on background).
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
   }
 });
 
