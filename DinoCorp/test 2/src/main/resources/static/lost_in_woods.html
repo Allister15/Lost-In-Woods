@@ -30,9 +30,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
 /* ─── SPLASH ─── */
 #splash{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%, #071a09 0%, #000 70%);overflow:hidden;}
-#home-mute{position:fixed;top:12px;left:12px;z-index:81;width:32px;height:32px;background:rgba(0,0,0,0.4);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;}
+#home-mute{position:fixed;top:52px;right:12px;z-index:81;width:32px;height:32px;background:rgba(0,0,0,0.4);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;}
 #home-mute:hover{border-color:var(--green);background:rgba(0,0,0,0.6);}
 #home-mute.muted{color:var(--muted);border-color:rgba(255,255,255,0.12);}
+#home-audio-btn{position:fixed;top:12px;right:12px;z-index:81;width:32px;height:32px;background:rgba(0,0,0,0.4);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;}
+#home-audio-btn:hover{border-color:var(--green);background:rgba(0,0,0,0.6);}
 #splash-trees{position:absolute;bottom:0;left:0;right:0;height:45%;pointer-events:none;}
 #splash-fog{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(to top, rgba(8,30,10,0.9) 0%, rgba(8,30,10,0.4) 60%, transparent 100%);}
 .splash-content{position:relative;z-index:2;text-align:center;padding:0 20px;}
@@ -84,8 +86,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .ctrl-btn.off{color:var(--muted);border-color:rgba(255,255,255,0.12);}
 .ctrl-btn:hover{border-color:var(--green);}
 /* ─── AUDIO MENU ─── */
-.audio-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;backdrop-filter:blur(2px);}
-.audio-menu-overlay.show{display:flex;align-items:center;justify-content:center;}
+.audio-menu-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;backdrop-filter:blur(2px);align-items:center;justify-content:center;}
+.audio-menu-overlay.show{display:flex;}
+.audio-menu-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--green-dim);}
+.audio-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 4px;transition:all 0.2s;font-family:var(--font-b);}
+.audio-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.audio-tab:hover{color:var(--text);}
+.audio-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.audio-label{color:var(--green-dim);font-size:12px;text-transform:uppercase;letter-spacing:0.5px;}
+.audio-val{color:var(--green);font-size:11px;}
+#audio-tab-audio input[type="range"],#audio-tab-narration input[type="range"]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:linear-gradient(to right,rgba(74,138,90,0.4),rgba(111,179,129,0.6));border-radius:3px;outline:none;cursor:pointer;margin-bottom:14px;}
+#audio-tab-audio input[type="range"]::-webkit-slider-thumb,#audio-tab-narration input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+#audio-tab-audio input[type="range"]::-moz-range-thumb,#audio-tab-narration input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6fb381,#4a8a5a);border:2px solid var(--green);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+.audio-narr-apply{width:100%;margin-top:8px;padding:9px;background:rgba(74,222,128,0.08);border:1px solid var(--green-dim);border-radius:4px;color:var(--green);cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.2s;}
+.audio-narr-apply:hover{border-color:var(--green);background:rgba(74,222,128,0.14);}
 .audio-menu-popup{background:linear-gradient(135deg, rgba(11,28,18,0.95) 0%, rgba(8,20,12,0.97) 100%);border:2px solid var(--green-dim);border-radius:8px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.8), inset 0 1px 0 rgba(139,179,154,0.2);}
 .audio-menu-title{color:var(--green);font-size:16px;font-weight:bold;margin-bottom:20px;text-align:center;text-transform:uppercase;letter-spacing:1px;}
 .audio-menu-item{margin-bottom:16px;}
@@ -172,6 +186,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #loader .ring{width:46px;height:46px;border-width:3px;}
 #loader-text{font-family:var(--font-t);font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;animation:flicker 4s infinite;}
 #kb{font-size:10px;letter-spacing:1px;color:var(--green);text-align:center;padding:6px;flex-shrink:0;opacity:0.75;text-transform:uppercase;}
+
+/* ─── DAMAGE / HEAL FLASH ─── */
+#dmg-flash{position:fixed;inset:0;z-index:56;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, transparent 30%, rgba(200,20,20,0.72) 100%);}
+#dmg-flash.active{animation:dmgFlash 0.75s ease-out forwards;}
+@keyframes dmgFlash{0%{opacity:1;}100%{opacity:0;}}
+#heal-flash{position:fixed;inset:0;z-index:56;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, rgba(74,222,128,0.32) 0%, transparent 68%);}
+#heal-flash.active{animation:healFlash 1.1s ease-out forwards;}
+@keyframes healFlash{0%{opacity:0;}18%{opacity:1;}100%{opacity:0;}}
+
+/* ─── INVENTORY ACTIONS ─── */
+#inv-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;min-height:0;}
+.inv-usable{cursor:pointer;border-color:rgba(251,191,36,0.5)!important;background:rgba(251,191,36,0.08)!important;}
+.inv-usable:hover{border-color:var(--amber)!important;background:rgba(251,191,36,0.18)!important;}
+.inv-action-label{font-size:12px;color:var(--muted);font-style:italic;}
+.inv-pending-label{color:var(--amber);font-size:12px;font-style:italic;animation:cautionPulse 2s ease-in-out infinite;}
+.inv-action-btn{background:none;border:1px solid var(--green-dim);color:var(--green);border-radius:4px;padding:5px 13px;cursor:pointer;font-size:12px;font-family:var(--font-b);transition:all 0.2s;letter-spacing:0.5px;}
+.inv-action-btn:hover{border-color:var(--green);background:rgba(74,222,128,0.1);}
+.inv-cancel-btn{color:var(--muted);border-color:rgba(255,255,255,0.12);}
+.inv-cancel-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.05);}
 
 /* ─── END ─── */
 #end{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.93);backdrop-filter:blur(14px);flex-direction:column;padding:28px;}
@@ -270,10 +303,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 <div id="particles"></div>
 <div id="scanlines"></div>
 <div id="trans"></div>
+<div id="dmg-flash"></div>
+<div id="heal-flash"></div>
 
 <!-- ═══ SPLASH ═══ -->
 <div id="splash">
   <button id="home-mute" onclick="playClickSound(); toggleHomeTheme()" onmouseenter="playHoverBeep(event)" title="Mute forest ambience">🔊</button>
+  <button id="home-audio-btn" onclick="playClickSound(); openAudioMenu()" onmouseenter="playHoverBeep(event)" title="Audio settings">⚙️</button>
   <svg id="splash-trees" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
     <g opacity="0.25" fill="#0d2e0d">
       <polygon points="60,400 90,280 120,400"/><polygon points="200,400 240,220 280,400"/><polygon points="350,400 390,200 430,400"/>
@@ -359,6 +395,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
       </div>
       <div id="traits-row"></div>
       <div id="inv-row"></div>
+      <div id="inv-actions"></div>
       <div id="story-lower">
         <div id="story-box">
           <div id="chap-label"></div>
@@ -376,17 +413,68 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 <div id="audio-menu" class="audio-menu-overlay">
   <div class="audio-menu-popup">
     <div class="audio-menu-title">Audio Settings</div>
-    <div class="audio-menu-item">
-      <label>Music Volume</label>
-      <input type="range" id="vol-music" min="0" max="100" value="100" oninput="updateMusicVolume(this.value)">
-      <span id="vol-music-val">100%</span>
+
+    <div class="audio-menu-tabs">
+      <button class="audio-tab active" id="tab-btn-audio"
+        onclick="playClickSound(); switchAudioTab('audio')"
+        onmouseenter="playHoverBeep(event)">Audio</button>
+      <button class="audio-tab" id="tab-btn-narration"
+        onclick="playClickSound(); switchAudioTab('narration')"
+        onmouseenter="playHoverBeep(event)">Narration</button>
     </div>
-    <div class="audio-menu-item">
-      <label>Sound FX Volume</label>
-      <input type="range" id="vol-sfx" min="0" max="100" value="100" oninput="updateSfxVolume(this.value)">
-      <span id="vol-sfx-val">100%</span>
+
+    <!-- Audio Tab -->
+    <div id="audio-tab-audio">
+      <div class="audio-row">
+        <span class="audio-label">Master Volume</span>
+        <span class="audio-val" id="vol-master-val">100%</span>
+      </div>
+      <input type="range" id="vol-master" min="0" max="100" value="100"
+        oninput="updateMasterVolume(this.value)">
+
+      <div class="audio-row">
+        <span class="audio-label">Music Volume</span>
+        <span class="audio-val" id="vol-music-val">100%</span>
+      </div>
+      <input type="range" id="vol-music" min="0" max="100" value="100"
+        oninput="updateMusicVolume(this.value)">
+
+      <div class="audio-row">
+        <span class="audio-label">SFX Volume</span>
+        <span class="audio-val" id="vol-sfx-val">100%</span>
+      </div>
+      <input type="range" id="vol-sfx" min="0" max="100" value="100"
+        oninput="updateSfxVolume(this.value)">
     </div>
-    <button class="audio-menu-close" onclick="playClickSound(); closeAudioMenu()" onmouseenter="playHoverBeep(event)">Close</button>
+
+    <!-- Narration Tab -->
+    <div id="audio-tab-narration" style="display:none">
+      <div class="audio-row">
+        <span class="audio-label">Narration Volume</span>
+        <span class="audio-val" id="vol-narr-val">100%</span>
+      </div>
+      <input type="range" id="vol-narr" min="0" max="100" value="100"
+        oninput="updateNarrationVolume(this.value)">
+
+      <div class="audio-row">
+        <span class="audio-label">Speech Rate</span>
+        <span class="audio-val" id="narr-rate-val">0.95</span>
+      </div>
+      <input type="range" id="narr-rate" min="0.5" max="2" step="0.05" value="0.95"
+        oninput="document.getElementById('narr-rate-val').textContent=parseFloat(this.value).toFixed(2)">
+
+      <div class="audio-row">
+        <span class="audio-label">Speech Pitch</span>
+        <span class="audio-val" id="narr-pitch-val">0.80</span>
+      </div>
+      <input type="range" id="narr-pitch" min="0.5" max="2" step="0.05" value="0.8"
+        oninput="document.getElementById('narr-pitch-val').textContent=parseFloat(this.value).toFixed(2)">
+
+      <button class="audio-narr-apply"
+        onclick="playClickSound(); applyNarrationSettings()">Apply Changes</button>
+    </div>
+
+    <button class="audio-menu-close" onclick="playClickSound(); closeAudioMenu()">Close</button>
   </div>
 </div>
 
@@ -421,7 +509,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 </div><!-- /stage -->
 <script>
 const API = '/api';
-let G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, lastNarrative:'', busy:false, startEndpoint:'/auth/guest', startName:null };
+let G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, lastNarrative:'', busy:false, startEndpoint:'/auth/guest', startName:null, pendingAction:null };
 
 // ─── PARTICLES ───
 (function(){
@@ -442,7 +530,8 @@ async function errMsg(res){ try{ const j=await res.json(); return j.message || (
 let audioOn=false, narrationOn=false, audioCtx=null, ambient=null, uiMaster=null, audioInitialized=false, homeAmbient=null, homeAudioOn=true;
 let currentScene='dense_forest', sceneTimer=null;
 let sceneTarget = {base:90, filter:1000, noise:0.06};
-let musicVolume = 1.0, sfxVolume = 1.0;
+let musicVolume = 1.0, sfxVolume = 1.0, masterVolume = 1.0;
+let narrationRate = 0.95, narrationPitch = 0.8, narrationVolume = 1.0;
 let lastHoverBeepTime = {};
 // Per-location soundscape: drone pitch/filter/wind PLUS the ambient one-shots
 // ("events") that make each place clearly distinct.
@@ -488,7 +577,7 @@ function startAmbient(){
   const noise = ctx.createBufferSource(); noise.buffer=buf; noise.loop=true; const nf=ctx.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=900; const noiseGain=ctx.createGain(); noiseGain.gain.value=sceneTarget.noise; noise.connect(nf); nf.connect(noiseGain); noiseGain.connect(master); noise.start();
   const heart=ctx.createOscillator(); heart.type='sine'; heart.frequency.value=44; const heartGain=ctx.createGain(); heartGain.gain.value=0; heart.connect(heartGain); heartGain.connect(master); heart.start();
   const hlfo=ctx.createOscillator(); hlfo.type='sine'; hlfo.frequency.value=1.1; const hDepth=ctx.createGain(); hDepth.gain.value=0; hlfo.connect(hDepth); hDepth.connect(heartGain.gain); hlfo.start();
-  master.gain.linearRampToValueAtTime(0.32 * musicVolume, ctx.currentTime+1.5);
+  master.gain.linearRampToValueAtTime(0.32 * musicVolume * masterVolume, ctx.currentTime+1.5);
   ambient = {master, filt, oscs, ratios, lfo, noise, noiseGain, hDepth};
   startScheduler();
 }
@@ -538,17 +627,115 @@ function playEvent(name){
     case 'crow':    if(Math.random()<0.08) { tone('sawtooth', 380, 280, 0.35, 0.08, 'lowpass', 800); setTimeout(()=>tone('sawtooth',420,310,0.32,0.07,'lowpass',850),200); } break;
   }
 }
-function updateMusicVolume(val){ musicVolume = parseFloat(val) / 100; if(ambient && ambient.master) { ambient.master.gain.value = 0.32 * musicVolume; } document.getElementById('vol-music-val').textContent = val + '%'; }
-function updateSfxVolume(val){ sfxVolume = parseFloat(val) / 100; document.getElementById('vol-sfx-val').textContent = val + '%'; }
-function openAudioMenu(){ document.getElementById('audio-menu').classList.add('show'); }
-function closeAudioMenu(){ document.getElementById('audio-menu').classList.remove('show'); }
-function playHoverBeep(e){ initAudio(); const id = e.target.id || e.target.className; const now = Date.now(); if((lastHoverBeepTime[id] || 0) + 120 > now) return; lastHoverBeepTime[id] = now; if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=620; const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12*sfxVolume, t+0.008); g.gain.exponentialRampToValueAtTime(0.0001, t+0.06); const dest = ambient?.master || uiMaster; o.connect(g); g.connect(dest); o.start(t); o.stop(t+0.1); }
-function playClickSound(){ initAudio(); if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(880, t); o.frequency.exponentialRampToValueAtTime(440, t+0.12); const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16*sfxVolume, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+0.12); const dest = ambient?.master || uiMaster; o.connect(g); g.connect(dest); o.start(t); o.stop(t+0.15); }
+function updateMasterVolume(val) {
+  masterVolume = parseFloat(val) / 100;
+  if(ambient && ambient.master) ambient.master.gain.value = 0.32 * musicVolume * masterVolume;
+  if(homeAmbient && audioCtx) homeAmbient.master.gain.linearRampToValueAtTime(
+    homeAudioOn ? 0.22 * musicVolume * masterVolume : 0, audioCtx.currentTime + 0.1);
+  document.getElementById('vol-master-val').textContent = val + '%';
+  saveAudioSettings();
+}
+function updateMusicVolume(val) {
+  musicVolume = parseFloat(val) / 100;
+  if(ambient && ambient.master) ambient.master.gain.value = 0.32 * musicVolume * masterVolume;
+  if(homeAmbient && audioCtx) homeAmbient.master.gain.linearRampToValueAtTime(
+    homeAudioOn ? 0.22 * musicVolume * masterVolume : 0, audioCtx.currentTime + 0.1);
+  document.getElementById('vol-music-val').textContent = val + '%';
+  saveAudioSettings();
+}
+function updateSfxVolume(val){ sfxVolume = parseFloat(val) / 100; document.getElementById('vol-sfx-val').textContent = val + '%'; saveAudioSettings(); }
+function updateNarrationVolume(val) {
+  narrationVolume = parseFloat(val) / 100;
+  document.getElementById('vol-narr-val').textContent = val + '%';
+  saveAudioSettings();
+}
+function openAudioMenu() {
+  document.getElementById('vol-master').value = Math.round(masterVolume * 100);
+  document.getElementById('vol-master-val').textContent = Math.round(masterVolume * 100) + '%';
+  document.getElementById('vol-music').value = Math.round(musicVolume * 100);
+  document.getElementById('vol-music-val').textContent = Math.round(musicVolume * 100) + '%';
+  document.getElementById('vol-sfx').value = Math.round(sfxVolume * 100);
+  document.getElementById('vol-sfx-val').textContent = Math.round(sfxVolume * 100) + '%';
+  document.getElementById('vol-narr').value = Math.round(narrationVolume * 100);
+  document.getElementById('vol-narr-val').textContent = Math.round(narrationVolume * 100) + '%';
+  document.getElementById('narr-rate').value = narrationRate;
+  document.getElementById('narr-rate-val').textContent = narrationRate.toFixed(2);
+  document.getElementById('narr-pitch').value = narrationPitch;
+  document.getElementById('narr-pitch-val').textContent = narrationPitch.toFixed(2);
+  document.getElementById('audio-menu').style.display = 'flex';
+}
+function closeAudioMenu(){ document.getElementById('audio-menu').style.display = 'none'; }
+function switchAudioTab(tab) {
+  document.getElementById('audio-tab-audio').style.display = tab === 'audio' ? '' : 'none';
+  document.getElementById('audio-tab-narration').style.display = tab === 'narration' ? '' : 'none';
+  document.getElementById('tab-btn-audio').classList.toggle('active', tab === 'audio');
+  document.getElementById('tab-btn-narration').classList.toggle('active', tab === 'narration');
+}
+function applyNarrationSettings() {
+  narrationRate = parseFloat(document.getElementById('narr-rate').value);
+  narrationPitch = parseFloat(document.getElementById('narr-pitch').value);
+  saveAudioSettings();
+  if(narrationOn) narrate(G.lastNarrative);
+}
+function saveAudioSettings() {
+  try {
+    sessionStorage.setItem('liw_audio', JSON.stringify({
+      master: masterVolume, music: musicVolume, sfx: sfxVolume,
+      narVol: narrationVolume, narRate: narrationRate, narPitch: narrationPitch
+    }));
+  } catch(e) {}
+}
+function loadAudioSettings() {
+  try {
+    const raw = sessionStorage.getItem('liw_audio');
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.master  != null) masterVolume    = s.master;
+    if(s.music   != null) musicVolume     = s.music;
+    if(s.sfx     != null) sfxVolume       = s.sfx;
+    if(s.narVol  != null) narrationVolume = s.narVol;
+    if(s.narRate != null) narrationRate   = s.narRate;
+    if(s.narPitch!= null) narrationPitch  = s.narPitch;
+  } catch(e) {}
+}
+loadAudioSettings();
+function playDamageSound(){
+  if(!audioCtx||!uiMaster||sfxVolume<=0) return;
+  const ctx=audioCtx, t=ctx.currentTime, vol=sfxVolume*masterVolume;
+  const buf=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*0.45),ctx.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  const src=ctx.createBufferSource(); src.buffer=buf; src.loop=false;
+  const filt=ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=380;
+  const ng=ctx.createGain(); ng.gain.setValueAtTime(vol*0.55,t); ng.gain.exponentialRampToValueAtTime(0.0001,t+0.45);
+  src.connect(filt); filt.connect(ng); ng.connect(uiMaster); src.start(t); src.stop(t+0.45);
+  const o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(38,t+0.35);
+  const og=ctx.createGain(); og.gain.setValueAtTime(vol*0.45,t); og.gain.exponentialRampToValueAtTime(0.0001,t+0.35);
+  o.connect(og); og.connect(uiMaster); o.start(t); o.stop(t+0.35);
+}
+function playHealSound(){
+  if(!audioCtx||!uiMaster||sfxVolume<=0) return;
+  const ctx=audioCtx, t=ctx.currentTime, vol=sfxVolume*masterVolume;
+  [523,659,784,1046].forEach((freq,i)=>{
+    const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=freq;
+    const g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t+i*0.13); g.gain.exponentialRampToValueAtTime(vol*0.16,t+i*0.13+0.04); g.gain.exponentialRampToValueAtTime(0.0001,t+i*0.13+0.55);
+    o.connect(g); g.connect(uiMaster); o.start(t+i*0.13); o.stop(t+i*0.13+0.6);
+  });
+}
+function showDamageFlash(){
+  const el=document.getElementById('dmg-flash');
+  el.classList.remove('active'); void el.offsetWidth; el.classList.add('active');
+}
+function showHealFlash(){
+  const el=document.getElementById('heal-flash');
+  el.classList.remove('active'); void el.offsetWidth; el.classList.add('active');
+}
+function playHoverBeep(e){ initAudio(); const id = e.target.id || e.target.className; const now = Date.now(); if((lastHoverBeepTime[id] || 0) + 120 > now) return; lastHoverBeepTime[id] = now; if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=620; const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12*sfxVolume*masterVolume, t+0.008); g.gain.exponentialRampToValueAtTime(0.0001, t+0.06); o.connect(g); g.connect(uiMaster); o.start(t); o.stop(t+0.1); }
+function playClickSound(){ initAudio(); if(sfxVolume<=0 || !audioCtx || !uiMaster) return; const ctx=audioCtx; const t=ctx.currentTime; const o=ctx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(880, t); o.frequency.exponentialRampToValueAtTime(440, t+0.12); const g=ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16*sfxVolume*masterVolume, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+0.12); o.connect(g); g.connect(uiMaster); o.start(t); o.stop(t+0.15); }
 function startHomeTheme(){
   if(homeAmbient) return;
   initAudio();
   const ctx = ensureCtx(); 
-  const master = ctx.createGain(); master.gain.value = homeAudioOn ? 0.22 : 0;
+  const master = ctx.createGain(); master.gain.value = homeAudioOn ? 0.22 * musicVolume * masterVolume : 0;
   master.connect(ctx.destination);
   const filt = ctx.createBiquadFilter(); filt.type='lowpass'; filt.frequency.value=320; filt.connect(master);
   const oscs = [], ratios = [0.5, 1, 1.5];
@@ -577,12 +764,12 @@ function stopHomeTheme(){
 }
 function toggleHomeTheme(){
   homeAudioOn = !homeAudioOn;
-  if(homeAmbient) homeAmbient.master.gain.linearRampToValueAtTime(homeAudioOn?0.22:0, ensureCtx().currentTime+0.3);
+  if(homeAmbient) homeAmbient.master.gain.linearRampToValueAtTime(homeAudioOn ? 0.22 * musicVolume * masterVolume : 0, audioCtx.currentTime+0.5);
   document.getElementById('home-mute').classList.toggle('muted', !homeAudioOn);
 }
 function toggleMusic(){ audioOn=!audioOn; if(audioOn){ ensureCtx(); startAmbient(); setAudioScene(G.location, G.hp); } else stopAmbient(); document.getElementById('btn-music').classList.toggle('off', !audioOn); }
 function toggleNarration(){ narrationOn=!narrationOn; document.getElementById('btn-narr').classList.toggle('off', !narrationOn); if(!narrationOn){ try{window.speechSynthesis.cancel();}catch(e){} } else { narrate(G.lastNarrative); } }
-function narrate(text){ if(!narrationOn || !text || !('speechSynthesis' in window)) return; try{ const s=window.speechSynthesis; s.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=0.95; u.pitch=0.8; s.speak(u); }catch(e){} }
+function narrate(text){ if(!narrationOn || !text || !('speechSynthesis' in window)) return; try{ const s=window.speechSynthesis; s.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=narrationRate; u.pitch=narrationPitch; u.volume=Math.min(1, masterVolume * narrationVolume); s.speak(u); }catch(e){} }
 
 // ─── SPLASH AUTH ───
 function startGame(){
@@ -825,9 +1012,11 @@ async function beginStory(){
 async function choose(idx){
   playClickSound();
   if(G.busy) return;
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
   const c = G.choices[idx];
   if(!c) return;
-  const text = c.text;
+  let text = c.text;
+  if(G.pendingAction){ text += ` [Also: I ${G.pendingAction.verb} the ${G.pendingAction.item}]`; G.pendingAction = null; }
   setBusy(true);
   document.querySelectorAll('.ch').forEach(b=>b.disabled=true);
   showLoader(); // full loading screen while the AI generates the next beat
@@ -860,11 +1049,58 @@ function renderTraits(traits, elId){
   if(!el) return;
   el.innerHTML = (traits||[]).map(t=>`<span class="trait ${t.bad?'bad':'good'}">${escapeHtml(t.name)}</span>`).join('');
 }
+const FOOD_KW = ['berr','mushroom','ration','food','bread','meat','fruit','apple','sandwich','jerky','nut','seed','fungi','herb','plant','cracker','bar'];
+const DRINK_KW = ['water','flask','bottle','canteen','liquid','juice','soup','broth','potion','drink','stream','vial'];
+function getItemVerb(item){ const l=item.toLowerCase(); if(DRINK_KW.some(k=>l.includes(k))) return 'drink'; if(FOOD_KW.some(k=>l.includes(k))) return 'eat'; return null; }
+
 function renderInventory(items, elId){
   const el = document.getElementById(elId);
   if(!el) return;
-  if(!items || !items.length){ el.innerHTML=''; return; }
-  el.innerHTML = '<span class="inv-label">🎒 Pack</span>' + items.map(i=>`<span class="inv-chip">${escapeHtml(i)}</span>`).join('');
+  const acts = document.getElementById('inv-actions');
+  if(!items || !items.length){ el.innerHTML=''; if(acts) acts.innerHTML=''; return; }
+  el.innerHTML = '<span class="inv-label">🎒 Pack</span>' + items.map(item=>{
+    const verb = getItemVerb(item);
+    if(verb){
+      const icon = verb==='drink'?'💧':'🍎';
+      return `<span class="inv-chip inv-usable" data-item="${escapeHtml(item)}" data-verb="${verb}" onclick="playClickSound(); showItemAction(this.dataset.item, this.dataset.verb)">${escapeHtml(item)} ${icon}</span>`;
+    }
+    return `<span class="inv-chip">${escapeHtml(item)}</span>`;
+  }).join('');
+}
+function showItemAction(item, verb) {
+  const el = document.getElementById('inv-actions');
+  if(!el) return;
+  const label = verb==='drink' ? '💧 Drink' : '🍎 Eat';
+  el.innerHTML = '';
+  const lbl = document.createElement('span'); lbl.className='inv-action-label'; lbl.innerHTML='Use: <em>'+escapeHtml(item)+'</em>'; el.appendChild(lbl);
+  const useBtn = document.createElement('button'); useBtn.className='inv-action-btn'; useBtn.textContent=label;
+  useBtn.dataset.item=item; useBtn.dataset.verb=verb;
+  useBtn.onmouseenter=(e)=>playHoverBeep(e);
+  useBtn.onclick=()=>{ playClickSound(); useItem(useBtn.dataset.item, useBtn.dataset.verb); };
+  el.appendChild(useBtn);
+  const cancelBtn = document.createElement('button'); cancelBtn.className='inv-action-btn inv-cancel-btn'; cancelBtn.textContent='✕ Cancel';
+  cancelBtn.onmouseenter=(e)=>playHoverBeep(e);
+  cancelBtn.onclick=()=>{ playClickSound(); el.innerHTML=''; };
+  el.appendChild(cancelBtn);
+}
+function useItem(item, verb) {
+  if(G.busy) return;
+  G.pendingAction = {item, verb};
+  showPendingAction();
+}
+function showPendingAction() {
+  const el = document.getElementById('inv-actions');
+  if(!el || !G.pendingAction) return;
+  const {item, verb} = G.pendingAction;
+  const icon = verb==='drink' ? '💧' : '🍎';
+  el.innerHTML = '';
+  const lbl = document.createElement('span'); lbl.className='inv-action-label inv-pending-label';
+  lbl.textContent = icon+' Will '+verb+': '+item+' — pick any choice below to use it';
+  el.appendChild(lbl);
+  const cancelBtn = document.createElement('button'); cancelBtn.className='inv-action-btn inv-cancel-btn'; cancelBtn.textContent='✕ Cancel';
+  cancelBtn.onmouseenter=(e)=>playHoverBeep(e);
+  cancelBtn.onclick=()=>{ playClickSound(); G.pendingAction=null; el.innerHTML=''; };
+  el.appendChild(cancelBtn);
 }
 // ─── ON-SCENE CHARACTER (antagonists / NPCs) ───
 // Names only — NEVER reveal which sin a character is (keeps the surprise).
@@ -1063,6 +1299,7 @@ function setupTypewriterSkip() {
 }
 
 function renderBeat(data){
+  const prevHp = G.hp;
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
   G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||''; G.lastStance=(data.stance||'').toLowerCase().trim();
   document.getElementById('h-score').textContent = data.score;
@@ -1070,6 +1307,8 @@ function renderBeat(data){
   updateHp(data.hp);
   renderTraits(G.traits, 'traits-row');
   renderInventory(G.items, 'inv-row');
+  G.pendingAction = null;
+  const acts = document.getElementById('inv-actions'); if(acts) acts.innerHTML='';
   setSceneArt(data.location, data.narrative);
   setAudioScene(data.location, data.hp);
   renderSurvivor();
@@ -1077,6 +1316,10 @@ function renderBeat(data){
 
   G.lastNarrative = data.narrative || '';
   if(data.gameOver){ showEnd(data); return; }
+
+  // Damage / heal feedback — only after the beat fully renders
+  if(data.hp < prevHp){ showDamageFlash(); playDamageSound(); }
+  else if(data.hp > prevHp){ showHealFlash(); playHealSound(); }
 
   document.getElementById('chap-label').textContent = locationName(data.location);
   typewriteText(document.getElementById('scen-text'), data.narrative || '', 25);
@@ -1119,7 +1362,7 @@ function showEnd(data){
 
 function restart(){
   const { startEndpoint, startName, playerName, appearance } = G;
-  G = { sessionId:null, playerName, choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance, busy:false, startEndpoint, startName };
+  G = { sessionId:null, playerName, choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance, busy:false, startEndpoint, startName, pendingAction:null };
   document.getElementById('end').classList.remove('show');
   document.getElementById('game').style.display='flex';
   showLoader(); // cover the old scene immediately so it isn't shown while the new run loads
@@ -1156,7 +1399,7 @@ function goToMenu(){
   document.getElementById('auth-msg').textContent='';
   startHomeTheme();
   // Drop the abandoned run's state.
-  G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, busy:false, startEndpoint:'/auth/guest', startName:null };
+  G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, busy:false, startEndpoint:'/auth/guest', startName:null, pendingAction:null };
   loadLeaderboard('splash-leaderboard');
 }
 
