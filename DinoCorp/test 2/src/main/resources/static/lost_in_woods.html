@@ -1785,7 +1785,7 @@ function renderBeat(data){
     if(G.traits.length > 6) G.traits = G.traits.slice(0, 6);
   }
   // Easter egg: AM login — pin a red AM attribute every beat (cosmetic, no effect)
-  if(G.easterEggAM) {
+  if(G.startName && G.startName.toUpperCase() === 'AM') {
     G.traits = G.traits.filter(t => t.name !== 'AM');
     G.traits.unshift({name: 'AM', bad: true});
     if(G.traits.length > 6) G.traits = G.traits.slice(0, 6);
@@ -1916,7 +1916,7 @@ function freshGameState(keepIdentity){
     npc:'', lastOutcome:'', lastStance:'', lastSurvivorStance:'',
     survivorId:null, survivorName:'', startItems:[],
     godIsComingActive:false,
-    easterEggAM: false, hateAudioTriggered: false,
+    hateAudioTriggered: false,
   };
 }
 // "Play Again" — wipe the run's state and ALWAYS route back to character selection
