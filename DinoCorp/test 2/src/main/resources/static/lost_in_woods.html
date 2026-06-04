@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Lost In Woods — dinoCorp</title>
+<title>Lost In Woods</title>
+<link rel="icon" type="image/png" href="assets/logo.png"/>
+<link rel="shortcut icon" type="image/png" href="assets/logo.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -40,6 +42,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .splash-content{position:relative;z-index:2;text-align:center;padding:0 20px;}
 .splash-dino{font-family:var(--font-t);font-size:11px;letter-spacing:6px;color:rgba(74,222,128,0.5);text-transform:uppercase;margin-bottom:24px;animation:fadeInDown 1s ease 0.3s both;}
 .splash-title{font-family:var(--font-t);font-size:clamp(42px,7vw,86px);font-weight:900;color:var(--green);letter-spacing:6px;line-height:1;text-shadow:0 0 60px rgba(74,222,128,0.25),0 0 120px rgba(74,222,128,0.1);animation:fadeInDown 1s ease 0.6s both;margin-bottom:10px;}
+/* Logo + title sit on one horizontal line; logo to the LEFT of "LOST IN WOODS". */
+.splash-headline{display:flex;align-items:center;justify-content:center;gap:clamp(14px,2vw,28px);margin-bottom:10px;}
+.splash-headline .splash-title{margin:0;}
+.splash-logo{flex-shrink:0;width:auto;height:clamp(72px,9vw,116px);filter:drop-shadow(0 0 28px rgba(74,222,128,0.35));animation:fadeInDown 1s ease 0.3s both;image-rendering:auto;}
 .splash-subtitle{font-family:var(--font-b);font-size:16px;font-style:italic;color:rgba(200,216,200,0.5);letter-spacing:3px;animation:fadeInDown 1s ease 0.9s both;margin-bottom:26px;}
 
 .splash-auth{display:flex;flex-direction:column;gap:10px;width:300px;margin:0 auto 16px;animation:fadeInDown 1s ease 1.1s both;}
@@ -57,18 +63,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .splash-back:hover{border-color:var(--green);color:var(--green);}
 #auth-msg{font-size:13px;color:var(--red);min-height:18px;text-align:center;animation:fadeInDown 1s ease 1.3s both;}
 
-.leaderboard{margin:14px auto 0;max-width:300px;width:100%;text-align:left;max-height:170px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;}
+/* Leaderboard: 2 columns x up to 5 rows = 10 entries side by side. Stays clear of
+   the "Created by" credits at the bottom of the splash, even with a full list. */
+.leaderboard{margin:14px auto 0;max-width:560px;width:100%;text-align:left;}
 .lb-title{font-family:var(--font-t);font-size:10px;letter-spacing:3px;color:var(--green);text-transform:uppercase;text-align:center;margin-bottom:8px;}
-.lb-row{display:flex;align-items:center;gap:10px;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
-.lb-rank{width:18px;text-align:center;color:var(--muted);font-family:var(--font-t);font-size:11px;}
-.lb-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.lb-score{color:var(--green);font-family:var(--font-t);font-size:13px;}
+.lb-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:0;}
+.lb-row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;min-width:0;}
+.lb-rank{width:16px;text-align:center;color:var(--muted);font-family:var(--font-t);font-size:10px;flex-shrink:0;}
+.lb-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.lb-score{color:var(--green);font-family:var(--font-t);font-size:12px;flex-shrink:0;}
+.lb-empty{text-align:center;color:var(--muted);font-size:12px;padding:8px;}
 .lb-empty{font-size:12px;color:var(--muted);font-style:italic;text-align:center;padding:6px;}
 
-.splash-credits{position:absolute;bottom:22px;left:0;right:0;text-align:center;animation:fadeInDown 1s ease 1.5s both;}
-.credits-label{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.splash-credits{position:absolute;bottom:14px;left:0;right:0;text-align:center;animation:fadeInDown 1s ease 1.5s both;}
+.credits-label{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;opacity:0.7;}
 .credits-members{display:flex;gap:0;justify-content:center;flex-wrap:wrap;}
-.credit-name{font-family:var(--font-t);font-size:11px;letter-spacing:1px;color:rgba(74,222,128,0.55);padding:4px 14px;border-right:1px solid rgba(74,222,128,0.15);}
+.credit-name{font-family:var(--font-t);font-size:9px;letter-spacing:1px;color:rgba(74,222,128,0.45);padding:2px 10px;border-right:1px solid rgba(74,222,128,0.12);}
 .credit-name:last-child{border-right:none;}
 @keyframes fadeInDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
 
@@ -76,7 +86,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #game{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;overflow:hidden;animation:flicker 9s infinite;}
 @keyframes flicker{0%,100%{opacity:1}93%{opacity:0.96}94%{opacity:1}98%{opacity:0.98}}
 #topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 16px;padding:10px 18px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);flex-shrink:0;box-sizing:border-box;width:100%;}
-#gtitle{font-family:var(--font-t);font-size:13px;letter-spacing:4px;color:var(--green);opacity:0.85;cursor:pointer;transition:opacity 0.2s,text-shadow 0.2s;white-space:nowrap;flex-shrink:0;}
+#gtitle{font-family:var(--font-t);font-size:13px;letter-spacing:4px;color:var(--green);opacity:0.85;cursor:pointer;transition:opacity 0.2s,text-shadow 0.2s;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:8px;}
+.gtitle-logo{height:22px;width:auto;filter:drop-shadow(0 0 6px rgba(74,222,128,0.45));}
 #gtitle:hover{opacity:1;text-shadow:0 0 12px rgba(74,222,128,0.5);}
 #hud{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:flex-end;min-width:0;}
 .hud-item{text-align:center;}
@@ -114,7 +125,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #hp-bg{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;margin-top:3px;}
 #hp-fill{height:100%;border-radius:3px;transition:width 0.5s,background 0.5s;width:100%;background:var(--green);}
 #traits-row{flex:0 0 auto;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
-#traits-row:empty,#inv-row:empty{display:none;margin:0;}
+#traits-row:empty,#inv-row:empty,#inv-actions:empty{display:none;margin:0;}
 .traits-row{display:flex;gap:6px;flex-wrap:wrap;}
 .trait{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid;font-weight:600;}
 .trait.good{background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.4);color:#4ade80;}
@@ -122,12 +133,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 /* ── Triptych: left portrait · center scene · right portrait (equal height) ── */
 /* ── Triptych: left portrait · WIDE center scene · right portrait ── */
 #scene-row{flex:0 0 auto;display:flex;gap:14px;align-items:flex-start;justify-content:center;margin-bottom:14px;}
-.scene-holder{position:relative;box-sizing:border-box;height:262px;border:1px solid var(--frame);border-radius:8px;overflow:hidden;background:var(--murk);box-shadow:inset 0 0 40px rgba(0,0,0,0.72),0 4px 18px rgba(0,0,0,0.6);}
+.scene-holder{position:relative;box-sizing:border-box;height:248px;border:1px solid var(--frame);border-radius:8px;overflow:hidden;background:var(--murk);box-shadow:inset 0 0 40px rgba(0,0,0,0.72),0 4px 18px rgba(0,0,0,0.6);}
 .scene-holder.center{flex:1 1 auto;min-width:0;}                 /* center scene gets the extra width */
 .actor-col{flex:0 0 200px;display:flex;flex-direction:column;gap:8px;}  /* roomy portrait columns */
 .actor-col .scene-holder.side{width:100%;}
 /* contain = WHOLE body, never cropped/squashed; padding gives the figure breathing room */
-.scene-holder.side img{width:100%;height:100%;object-fit:contain;object-position:center bottom;padding:8px;box-sizing:border-box;image-rendering:pixelated;display:none;position:relative;z-index:1;}
+.scene-holder.side img{width:100%;height:100%;object-fit:contain;object-position:center center;padding:10px;box-sizing:border-box;image-rendering:pixelated;display:none;position:relative;z-index:1;}
 #scene-antagonist.demon{animation:demonReveal 2.2s ease-in both;}
 /* "alone" / no-art frame: murky etched panel with a faint sigil — never flat black */
 .frame-glyph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:40px;color:rgba(160,175,150,0.10);text-shadow:0 0 22px rgba(0,0,0,0.85);pointer-events:none;z-index:0;}
@@ -163,13 +174,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #story-lower>#story-box{flex:1 1 58%;margin-bottom:0;min-width:0;display:flex;flex-direction:column;max-height:100%;overflow:hidden;}
 #story-lower #chap-label{flex:0 0 auto;}
 #story-lower #scen-text{flex:1 1 auto;min-height:0;overflow-y:auto;margin-bottom:0;padding-right:10px;scrollbar-width:thin;scrollbar-color:var(--accent-dim) transparent;}
-#story-lower>#choices{flex:1 1 42%;grid-template-columns:1fr;align-content:start;min-width:0;max-height:100%;overflow-y:auto;}
+#story-lower>#choices{flex:1 1 42%;display:flex;flex-direction:column;justify-content:flex-start;gap:10px;min-width:0;}
+#story-lower>#choices>.ch{flex:0 0 auto;}  /* buttons keep their natural height — fully visible, no scroll, no clip */
 #scen-text{max-width:70ch;}
 #chap-label{font-size:13px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;text-align:center;margin:0 -28px 22px;padding:15px 10px;border-bottom:1px solid var(--accent-dim);background:linear-gradient(180deg,rgba(40,32,14,0.28),transparent);text-shadow:0 0 10px rgba(0,0,0,0.7);}
 #scen-text{font-size:17px;line-height:1.7;color:#d8e6d4;margin-bottom:0;white-space:pre-wrap;}
 #scen-text::first-letter{font-family:var(--font-t);font-size:2.7em;line-height:0.9;float:left;padding:4px 10px 0 0;color:var(--accent);text-shadow:0 0 14px rgba(194,168,106,0.4);}
 #choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.ch{position:relative;background:linear-gradient(180deg,rgba(13,24,16,0.92),rgba(6,13,9,0.94));border:1px solid var(--frame);border-radius:6px;padding:14px 16px 14px 22px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all 0.2s;text-align:left;color:#cbe0cb;font-family:var(--font-b);font-size:17px;line-height:1.5;box-shadow:inset 0 0 18px rgba(0,0,0,0.5);overflow:hidden;}
+.ch{position:relative;background:linear-gradient(180deg,rgba(13,24,16,0.92),rgba(6,13,9,0.94));border:1px solid var(--frame);border-radius:6px;padding:11px 14px 11px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;transition:all 0.2s;text-align:left;color:#cbe0cb;font-family:var(--font-b);font-size:16px;line-height:1.4;box-shadow:inset 0 0 18px rgba(0,0,0,0.5);overflow:hidden;}
 .ch::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0.4;transition:opacity 0.2s;}
 .ch:hover:not(:disabled){border-color:var(--green);color:#eaffea;transform:translateY(-1px);box-shadow:inset 0 0 22px rgba(74,222,128,0.12),0 0 16px rgba(74,222,128,0.16);}
 .ch:hover:not(:disabled)::before{opacity:1;background:var(--green);}
@@ -215,7 +227,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #end-story{font-size:15px;line-height:1.7;color:#cdddcd;margin-bottom:22px;white-space:pre-wrap;text-align:left;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:18px;}
 #end-score{font-family:var(--font-t);font-size:clamp(40px,6vw,58px);color:var(--green);margin-bottom:2px;text-shadow:0 0 30px rgba(74,222,128,0.3);}
 #end-sl{font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:18px;text-transform:uppercase;}
-#rbtn{font-family:var(--font-t);font-size:12px;letter-spacing:3px;background:transparent;border:1px solid var(--green);color:var(--green);padding:13px 38px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.3s;margin-top:6px;}
+#end-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+#rbtn,#rbtn-menu{font-family:var(--font-t);font-size:12px;letter-spacing:3px;background:transparent;border:1px solid var(--green);color:var(--green);padding:13px 28px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.3s;}
+#rbtn:hover,#rbtn-menu:hover{background:rgba(74,222,128,0.10);box-shadow:0 0 14px rgba(74,222,128,0.25);}
+#rbtn-menu{border-color:var(--accent-dim);color:var(--accent);}
+#rbtn-menu:hover{background:rgba(194,168,106,0.10);border-color:var(--accent);box-shadow:0 0 14px rgba(194,168,106,0.25);}
 #rbtn:hover{background:var(--green);color:#000;}
 
 /* ─── CONFIRM DIALOG ─── */
@@ -244,6 +260,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #creator{background:radial-gradient(ellipse at 50% 50%, #021006 0%, #000 75%);}
 #creator-title{font-family:'Courier New',monospace;font-weight:bold;color:#62ffa6;letter-spacing:5px;font-size:15px;margin-bottom:16px;text-shadow:0 0 8px rgba(98,255,166,0.7);text-align:center;}
 #char-preview.pix-frame{position:relative;display:inline-block;width:auto;height:auto;background:#03130a;border:2px solid #1f7a3a;filter:drop-shadow(0 0 10px rgba(98,255,166,0.45));margin-bottom:4px;padding:10px 16px;}
+/* Char-creator loading veil: covers the portrait while a new survivor's art loads, so the
+   raw green ANSI fallback never flashes between picks. Fades in/out quickly. */
+#char-preview .char-veil{position:absolute;inset:0;background:#03130a;display:flex;align-items:center;justify-content:center;color:#5dffa0;font-family:'Courier New',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity 0.18s;z-index:5;}
+#char-preview.loading .char-veil{opacity:1;}
+.char-veil::before{content:'';width:18px;height:18px;border:2px solid rgba(98,255,166,0.3);border-top-color:#62ffa6;border-radius:50%;margin-right:10px;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 #char-ascii{font-family:'Courier New',monospace;font-size:15px;line-height:15px;color:#5dffa0;white-space:pre;margin:0;text-shadow:0 0 5px rgba(93,255,160,0.5);}
 /* Real ANSI-art portrait (assets/char/<id>.png). Shown cover-cropped in the CRT frame; falls back to #char-ascii when missing. */
 #char-img{display:none;width:290px;height:400px;object-fit:contain;object-position:center;image-rendering:pixelated;vertical-align:bottom;}
@@ -263,8 +285,100 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #caution-click{font-family:var(--font-t);font-size:11px;letter-spacing:4px;color:rgba(74,222,128,0.5);text-transform:uppercase;animation:cautionPulse 2s ease-in-out infinite;}
 @keyframes cautionPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
 
-/* Disabled: the fixed 1280x720 stage handles all window sizes by scaling, so
-   viewport media queries must NOT reflow the layout (kept here, parked at 1px). */
+/* ╭───────────────────────────────────────────────────────────────────────╮
+   │  MOBILE LAYOUT — bypasses the fixed 1280x720 desktop stage.           │
+   │  Toggled by fitStage() (JS) which adds body.mobile-mode + an          │
+   │  orientation class. The stage becomes the full viewport (100dvw x     │
+   │  100dvh, no scale), then native flex/grid fills it. Strict zero-      │
+   │  scroll: only #scen-text inside #story-box can scroll vertically.     │
+   ╰───────────────────────────────────────────────────────────────────────╯ */
+body.mobile-mode #stage{position:fixed;top:0;left:0;transform:none;width:100dvw;height:100dvh;}
+body.mobile-mode #game{width:100%;height:100%;}
+body.mobile-mode #topbar{padding:8px 12px;gap:6px 10px;}
+body.mobile-mode #gtitle{font-size:11px;letter-spacing:2px;}
+body.mobile-mode .gtitle-logo{height:18px;}
+body.mobile-mode #hud{gap:6px 10px;}
+body.mobile-mode .ctrl-btn{width:28px;height:28px;font-size:13px;}
+body.mobile-mode .hud-label{font-size:8px;letter-spacing:1px;}
+body.mobile-mode .hud-val{font-size:13px;}
+body.mobile-mode #hp-wrap{width:64px;}
+body.mobile-mode #kb{display:none;}                           /* hide "Press A·B·C·D" — no keyboard on phones */
+body.mobile-mode #story-wrap{padding:8px 10px;align-items:stretch;}
+body.mobile-mode #story{padding:0;max-width:none;height:100%;}
+body.mobile-mode #traits-row,body.mobile-mode #inv-row{font-size:11px;gap:4px;margin-bottom:4px;}
+body.mobile-mode .trait,body.mobile-mode .inv-chip{font-size:10px;padding:2px 6px;}
+body.mobile-mode .actor-name{font-size:10px;letter-spacing:1px;min-height:13px;}
+body.mobile-mode .scene-holder{box-shadow:inset 0 0 22px rgba(0,0,0,0.7),0 2px 8px rgba(0,0,0,0.5);}
+/* Shared splash sizing for both orientations */
+body.mobile-mode .splash-auth{width:88%;max-width:380px;}
+body.mobile-mode .splash-play{padding:14px 20px;font-size:13px;letter-spacing:3px;min-height:48px;}
+body.mobile-mode .leaderboard{max-width:90%;}
+body.mobile-mode .lb-grid{grid-template-columns:1fr;}
+body.mobile-mode .lb-row{font-size:11px;}
+
+/* ── PORTRAIT MOBILE ─────────────────────────────────────────────────── */
+body.mobile-portrait .splash-headline{flex-direction:column;gap:4px;}
+body.mobile-portrait .splash-logo{height:clamp(80px,22vw,130px);}
+body.mobile-portrait .splash-title{font-size:clamp(34px,11vw,64px);letter-spacing:4px;}
+body.mobile-portrait .splash-subtitle{font-size:11px;letter-spacing:2px;margin-bottom:16px;}
+body.mobile-portrait #creator{padding:10px 14px;}
+body.mobile-portrait #creator-title{font-size:12px;letter-spacing:3px;margin-bottom:8px;}
+body.mobile-portrait #char-img{width:clamp(180px,60vw,260px);height:clamp(240px,78vw,360px);}
+body.mobile-portrait #char-name{font-size:13px;margin:6px 0 2px;}
+body.mobile-portrait .sel-row{width:88%;max-width:360px;padding:10px 12px;}
+body.mobile-portrait .sel-arrow{width:42px;height:42px;font-size:22px;}     /* finger-sized */
+body.mobile-portrait .sel-val{font-size:15px;}
+body.mobile-portrait #creator-actions{flex-direction:column;width:88%;max-width:380px;}
+body.mobile-portrait #creator-actions>*{width:100%;}
+/* In-game: topbar + triptych + narrative + 2x2 choices, full height */
+body.mobile-portrait #story-lower{flex-direction:column;gap:8px;min-height:0;}
+body.mobile-portrait #story-lower>#story-box{flex:1 1 auto;min-height:0;max-height:none;overflow:hidden;display:flex;flex-direction:column;}
+body.mobile-portrait #story-lower #scen-text{flex:1 1 auto;overflow-y:auto;}  /* the ONE permitted scroll */
+body.mobile-portrait #story-lower>#choices{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+body.mobile-portrait .ch{padding:11px 12px;font-size:14px;line-height:1.3;min-height:52px;}
+body.mobile-portrait .ch-key{width:22px;height:22px;font-size:10px;}
+body.mobile-portrait #scene-row{gap:6px;margin-bottom:8px;}
+body.mobile-portrait .scene-holder{height:clamp(140px,24dvh,200px);}
+body.mobile-portrait .actor-col{flex:0 0 24%;gap:4px;}
+body.mobile-portrait .scene-holder.side img{padding:4px;}
+body.mobile-portrait #chap-label{font-size:11px;letter-spacing:3px;margin:0 -14px 10px;padding:9px 6px;}
+body.mobile-portrait #scen-text{font-size:14px;line-height:1.55;}
+body.mobile-portrait #scen-text::first-letter{font-size:2.2em;padding-right:6px;}
+body.mobile-portrait #story-box{padding:4px 14px 12px;}
+
+/* ── LANDSCAPE MOBILE ────────────────────────────────────────────────── */
+body.mobile-landscape .splash-headline{gap:14px;}
+body.mobile-landscape .splash-logo{height:clamp(56px,16vh,96px);}
+body.mobile-landscape .splash-title{font-size:clamp(28px,9vh,56px);letter-spacing:5px;}
+body.mobile-landscape .splash-subtitle{font-size:10px;letter-spacing:2px;margin-bottom:10px;}
+body.mobile-landscape .splash-play{padding:10px 18px;font-size:12px;min-height:40px;}
+body.mobile-landscape .splash-credits{display:none;}                          /* hide credits to save vertical room */
+body.mobile-landscape .leaderboard{display:none;}                             /* same — keep menu compact */
+body.mobile-landscape #creator{padding:8px 14px;}
+body.mobile-landscape #creator-title{font-size:11px;margin-bottom:4px;}
+body.mobile-landscape #char-img{width:clamp(120px,26vw,200px);height:clamp(160px,62dvh,260px);}
+body.mobile-landscape #char-name{font-size:11px;margin:4px 0 2px;}
+body.mobile-landscape .sel-row{width:60vw;max-width:360px;padding:6px 10px;margin-bottom:6px;}
+body.mobile-landscape .sel-arrow{width:36px;height:36px;font-size:18px;}
+body.mobile-landscape #creator-actions{margin-top:4px;gap:8px;}
+/* In-game: keep 2-column layout (narrative | choices) but compressed for the short height */
+body.mobile-landscape #story-wrap{padding:6px 10px;}
+body.mobile-landscape #scene-row{gap:6px;margin-bottom:6px;}
+body.mobile-landscape .scene-holder{height:clamp(80px,24dvh,140px);}
+body.mobile-landscape .actor-col{flex:0 0 16%;}
+body.mobile-landscape .scene-holder.side img{padding:3px;}
+body.mobile-landscape #story-lower{flex-direction:row;gap:10px;}
+body.mobile-landscape #story-lower>#story-box{flex:1 1 56%;max-height:100%;overflow:hidden;display:flex;flex-direction:column;padding:2px 12px 10px;}
+body.mobile-landscape #story-lower #scen-text{flex:1 1 auto;overflow-y:auto;font-size:13px;line-height:1.45;}
+body.mobile-landscape #story-lower>#choices{flex:1 1 44%;display:flex;flex-direction:column;gap:6px;}
+body.mobile-landscape .ch{padding:8px 10px;font-size:13px;line-height:1.35;min-height:36px;}
+body.mobile-landscape .ch-key{width:20px;height:20px;font-size:9px;}
+body.mobile-landscape #chap-label{font-size:10px;letter-spacing:3px;margin:0 -12px 8px;padding:8px 6px;}
+body.mobile-landscape #scen-text::first-letter{font-size:1.9em;padding-right:5px;}
+body.mobile-landscape #traits-row,body.mobile-landscape #inv-row{margin-bottom:4px;}
+body.mobile-landscape #kb{display:none;}
+
+/* Parked: the old fixed-stage parking queries (kept inert in case we ever revisit). */
 @media(max-width:1px){
   #story-lower{flex-direction:column;}
   #story-lower>#story-box{margin-bottom:18px;}
@@ -325,7 +439,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="splash-fog"></div>
   <div class="splash-content">
     <div class="splash-dino">dinoCorp Presents</div>
-    <div class="splash-title">🌲 LOST IN WOODS</div>
+    <div class="splash-headline">
+      <img class="splash-logo" src="assets/logo.png" alt="Lost In Woods"/>
+      <div class="splash-title">LOST IN WOODS</div>
+    </div>
     <div class="splash-subtitle">A Psychological Survival Horror — narrated by AI</div>
     <div class="splash-auth">
       <div id="mode-choice">
@@ -344,6 +461,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div class="splash-credits">
     <div class="credits-label">Created by</div>
     <div class="credits-members">
+      <div class="credit-name">Nelson Cantela</div>
+      <div class="credit-name">Diover Canillo</div>
       <div class="credit-name">Heeroe Conel</div>
       <div class="credit-name">John Roque Mance</div>
       <div class="credit-name">Rich Malig</div>
@@ -355,7 +474,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 <!-- ═══ CHARACTER CREATION ═══ -->
 <div id="creator">
   <div id="creator-title">▓▓ CHOOSE YOUR SURVIVOR ▓▓</div>
-  <div id="char-preview" class="pix-frame"><pre id="char-ascii"></pre><img id="char-img" alt=""></div>
+  <div id="char-preview" class="pix-frame"><pre id="char-ascii"></pre><img id="char-img" alt=""><div class="char-veil">Loading…</div></div>
   <div id="char-name"></div>
   <div class="sel-row"><button class="sel-arrow" onclick="playClickSound(); cycle(-1)" onmouseenter="playHoverBeep(event)">‹</button><div class="sel-mid"><div class="sel-label">Survivor</div><div class="sel-val" id="sel-class"></div></div><button class="sel-arrow" onclick="playClickSound(); cycle(1)" onmouseenter="playHoverBeep(event)">›</button></div>
   <div id="creator-actions">
@@ -367,7 +486,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 <!-- ═══ GAME ═══ -->
 <div id="game">
   <div id="topbar">
-    <div id="gtitle" onclick="askReturnToMenu()" title="Return to main menu">🌲 Lost In Woods</div>
+    <div id="gtitle" onclick="askReturnToMenu()" title="Return to main menu"><img class="gtitle-logo" src="assets/logo.png" alt=""/>Lost In Woods</div>
     <div id="hud">
       <button class="ctrl-btn off" id="btn-music" onclick="playClickSound(); toggleMusic()" onmouseenter="playHoverBeep(event)" title="Toggle music">♪</button>
       <button class="ctrl-btn off" id="btn-narr" onclick="playClickSound(); toggleNarration()" onmouseenter="playHoverBeep(event)" title="Toggle narration">🗣</button>
@@ -487,7 +606,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <div id="end-score">0</div>
     <div id="end-sl">Final Score</div>
     <div id="end-leaderboard" class="leaderboard"></div>
-    <button id="rbtn" onclick="playClickSound(); restart()" onmouseenter="playHoverBeep(event)">Play Again</button>
+    <div id="end-actions">
+      <button id="rbtn" onclick="playClickSound(); restart()" onmouseenter="playHoverBeep(event)">Play Again</button>
+      <button id="rbtn-menu" onclick="playClickSound(); goToMenu()" onmouseenter="playHoverBeep(event)">Return to Main Menu</button>
+    </div>
   </div>
 </div>
 
@@ -509,7 +631,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 </div><!-- /stage -->
 <script>
 const API = '/api';
-let G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, lastNarrative:'', busy:false, startEndpoint:'/auth/guest', startName:null, pendingAction:null };
+// G is rebuilt by freshGameState() (defined below) on every reset to make sure
+// nothing — items, traits, survivor, npc, stance, audio flags — leaks between runs.
+let G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, lastNarrative:'', busy:false, startEndpoint:'/auth/guest', startName:null, pendingAction:null, npc:'', lastOutcome:'', lastStance:'', lastSurvivorStance:'', survivorId:null, survivorName:'', startItems:[], godIsComingActive:false };
 
 // ─── PARTICLES ───
 (function(){
@@ -855,7 +979,7 @@ const ANSI_FIG = {
   ghost:{gear:'hood',  build:'thin', coat:'long', prop:'none'},
   dwarf:{gear:'cap',   build:'round',coat:'short',prop:'none'},
   transformed_man:{gear:'hair',build:'broad',coat:'short',prop:'none'},
-  seeker:{gear:'hood', build:'thin', coat:'long', prop:'staff'}
+  keeper:{gear:'hood', build:'thin', coat:'long', prop:'staff'}
 };
 const SHADE=[' ','░','▒','█'];
 function buildAnsi(id){
@@ -897,6 +1021,9 @@ function buildAnsi(id){
   }
   return ch.map(r=>r.join('')).join('\n');
 }
+// Cache of already-loaded creator portraits so cycling between previously-seen
+// survivors is instantaneous (no loading veil for cache hits).
+const CREATOR_IMG_CACHE = {};
 function renderChar(){
   const p = PRESETS[PRESET_I];
   document.getElementById('char-name').textContent = p.name;
@@ -906,11 +1033,32 @@ function renderChar(){
   // Prefer the hand-made ANSI-art portrait if one exists for this survivor.
   const frame = document.getElementById('char-preview');
   const img = document.getElementById('char-img');
+  const url = `assets/char/${p.id}.png`;
+  // If we've already loaded this portrait once, swap instantly with no veil.
+  if(CREATOR_IMG_CACHE[url] === true){
+    frame.classList.remove('loading');
+    img.src = url; frame.classList.add('has-img');
+    return;
+  }
+  if(CREATOR_IMG_CACHE[url] === false){
+    frame.classList.remove('loading','has-img');
+    return; // no portrait file -> fall back to green ANSI
+  }
+  // First load for this survivor: cover the frame with the loading veil while the PNG decodes.
   frame.classList.remove('has-img');
+  frame.classList.add('loading');
   const probe = new Image();
-  probe.onload = ()=>{ if(PRESETS[PRESET_I].id===p.id){ img.src = probe.src; frame.classList.add('has-img'); } };
-  probe.onerror = ()=>{ if(PRESETS[PRESET_I].id===p.id){ frame.classList.remove('has-img'); } };
-  probe.src = `assets/char/${p.id}.png`;
+  probe.onload = ()=>{
+    CREATOR_IMG_CACHE[url] = true;
+    if(PRESETS[PRESET_I].id !== p.id) return; // user cycled past this one
+    img.src = probe.src; frame.classList.add('has-img'); frame.classList.remove('loading');
+  };
+  probe.onerror = ()=>{
+    CREATOR_IMG_CACHE[url] = false;
+    if(PRESETS[PRESET_I].id !== p.id) return;
+    frame.classList.remove('has-img','loading');
+  };
+  probe.src = url;
 }
 // Higher-res shaded green portrait drawn to a canvas (fast: ~2800 px, one pass).
 const FW=48, FH=58;
@@ -978,12 +1126,31 @@ function showCreator(){
   document.getElementById('creator').classList.add('show');
   renderChar();
 }
+// Each survivor's UNIQUE signature kit. A run randomly starts with some, all, or NONE of these.
+// Entries can be a function for items with a random quantity (e.g. Kane's quiver).
+const CHAR_ITEMS = {
+  runa:   ['Survival Knife','Flint and Steel','Water Canteen','Dried Meat Strips'],
+  kane:   ['Compound Bow', ()=>`Quiver (${3+Math.floor(Math.random()*10)} arrows)`, 'Water Canteen','Berries'],
+  esme:   ['Bandages','Knife','Water Canteen','Apple'],
+  voss:   ['Water Gourd','Staff','Grapes'],
+  morrow: ['Crowbar','Compass','Water Canteen','Canned Rations'],
+  pip:    ['Small Hand Mirror','Knife','Water Canteen','Dried Fruits'],
+};
+// Completely random opening inventory: a real chance of nothing, otherwise each item ~55%.
+function rollStartingItems(id){
+  const pool = CHAR_ITEMS[id] || [];
+  if(Math.random() < 0.18) return [];                 // sometimes you wake with nothing and must scavenge
+  const out = [];
+  for(const it of pool){ if(Math.random() < 0.55) out.push(typeof it==='function' ? it() : it); }
+  return out.slice(0,6);                               // engine caps inventory at 6
+}
 function enterWoods(){
   stopHomeTheme();
   const p = PRESETS[PRESET_I];
   G.appearance = { character: p.name + ', ' + p.desc };
   G.survivorId = p.id; // remember the chosen survivor so they appear all run
   G.survivorName = p.name; // shown on the nameplate below their portrait
+  G.startItems = rollStartingItems(p.id); // random per-character opening inventory (may be empty)
   document.getElementById('creator').classList.remove('show');
   document.getElementById('game').style.display='flex';
   // Auto-start ambient music (this click satisfies the browser autoplay gate).
@@ -998,7 +1165,7 @@ async function beginStory(){
   try {
     const res = await fetch(`${API}/story/start`,{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(Object.assign({sessionId: G.sessionId}, G.appearance||{}))
+      body: JSON.stringify(Object.assign({sessionId: G.sessionId}, G.appearance||{}, {startingItems: G.startItems||[]}))
     });
     if(!res.ok) throw new Error(await errMsg(res));
     renderBeat(await res.json());
@@ -1107,7 +1274,7 @@ function showPendingAction() {
 const NPC_NAMES = {
   banner:'Banner', yuri:'Yuri', felicia:'Felicia', nagi:'Nagi',
   vincent:'Vincent', sammuel:'Sammuel', adam:'Adam',
-  ghost:'A Ghost', dwarf:'A Dwarf', transformed_man:'The Transformed Man', seeker:'The Seeker'
+  ghost:'A Ghost', dwarf:'A Dwarf', transformed_man:'The Transformed Man', keeper:'The Keeper'
 };
 // ── The 7 Sins: real ANSI-art sprites with base / stance / demon-form tiers ──
 // COMBAT = active-violence words ONLY, so the "attacking" stance fires solely when a
@@ -1123,17 +1290,32 @@ const NPC_STANCES = {
   vincent:[['attacking',COMBAT],['predator',['predator','stalk','prowl','hunt','circle','closing in','corner']],['possessive',['possess','mine','grip','claim','cling','obsess','own']],['seductive',['seduc','charm','allure','whisper','sweet','tempt','smile','beckon']],['rapturous',['rapture','rapturous','ecstasy','bliss','fervor','enthrall']]],
   yuri:[['attacking',COMBAT],['sneering',['sneer','scorn','mock','contempt','curl','jeer']],['covetous',['covet','envy','want','desire','crave','yearn','jealous','long for']],['resentful',['resent','bitter','grudge','spite']],['brooding',['brood','sulk','lurk','shadow','watch','stare','silent','linger']]],
 };
+// Survivor stance vocabulary — exactly matches the PNGs on disk under assets/char/.
+// The AI emits "survivor_stance" each beat; we VALIDATE it here (no keyword guessing),
+// then load assets/char/<id>_<stance>.png. Unknown / "base" / missing -> base portrait.
+const SURVIVOR_STANCES = {
+  esme:  new Set(['desperate','observing','overwhelmed','scared','shielding','shocked']),
+  kane:  new Set(['chasing','cornered','reacting','scanning','tracking']),
+  morrow:new Set(['attacking','confronting','investigating','mad']),
+  pip:   new Set(['attacking','checking','panicking','rallying','rambling']),
+  runa:  new Set(['assessing','attacking','disengaging','interrogating','waiting']),
+  voss:  new Set(['accepting','invoking','listening','whispering','witnessing']),
+};
+const SURVIVOR_IMG_CACHE = {};
 const NPC_DEMON = new Set(['adam','banner','felicia','nagi','sammuel','vincent','yuri']);
 // DemonForm is RESTRICTED to late-game ending events (never on a normal "continue" beat, and not on plain death).
 const DEMON_OUTCOMES = new Set(['escape','transformation','lost','secret']);
 const NPC_IMG_CACHE = {};
 
-// Pick which sprite fits THIS scene. The AI picks the stance (it understands the
-// scene); we only VALIDATE it against the NPC's real options. No keyword guessing —
-// that caused mismatches (e.g. "attacking" on a calm talk). Unknown/missing -> base.
+// Sin antagonist art has THREE tiers, picked by the AI's stance/outcome:
+//   1) FULL DEMON  - <id>_demon.png   (only on a sin-driven ending outcome)
+//   2) MID DEMON   - <id>_mid_demon.png  (stance:"mid_demon" — a tense partial reveal late in the arc)
+//   3) BASE/STANCE - <id>[_<stance>].png (default)
+// The AI chooses the stance; we only VALIDATE against real options. No keyword guessing.
 function npcArtUrl(id, outcome, stance){
   if(NPC_DEMON.has(id) && DEMON_OUTCOMES.has((outcome||'').toLowerCase())) return `assets/npc/${id}_demon.png`;
   const s = (stance||'').toLowerCase().trim();
+  if(s === 'mid_demon' && NPC_DEMON.has(id)) return `assets/npc/${id}_mid_demon.png`;
   if(s && s!=='base' && (NPC_STANCES[id]||[]).some(([st])=>st===s)) return `assets/npc/${id}_${s}.png`;
   return `assets/npc/${id}.png`; // base / default form (neutral)
 }
@@ -1168,15 +1350,34 @@ function renderNpc(id, stance, outcome){
   probe.onerror = ()=>{ NPC_IMG_CACHE[url]=false; };
   probe.src = url;
 }
+// Pick the survivor sprite for THIS beat. The AI emits "survivor_stance"; we VALIDATE
+// it against that survivor's real options. Unknown / "base" / missing -> base portrait.
+function survivorArtUrl(id, stance){
+  if(!id) return '';
+  const s = (stance||'').toLowerCase().trim();
+  if(s && s!=='base' && SURVIVOR_STANCES[id] && SURVIVOR_STANCES[id].has(s)) return `assets/char/${id}_${s}.png`;
+  return `assets/char/${id}.png`;
+}
 // The chosen survivor fills the LEFT frame and persists through the whole run.
-function renderSurvivor(){
+function renderSurvivor(stance){
   const el = document.getElementById('scene-survivor');
   const holder = el.parentElement;
   const nameEl = document.getElementById('survivor-name');
   if(!G.survivorId){ el.style.display='none'; holder.classList.remove('has-art'); nameEl.textContent=''; return; }
-  const url = `assets/char/${G.survivorId}.png`;
-  if(el.getAttribute('src') !== url) el.src = url;
-  el.style.display='block'; holder.classList.add('has-art');
+  const url = survivorArtUrl(G.survivorId, stance ?? G.lastSurvivorStance);
+  const baseUrl = `assets/char/${G.survivorId}.png`;
+  const show = src => { if(el.getAttribute('src') !== src) el.src = src; el.style.display='block'; holder.classList.add('has-art'); };
+  if(SURVIVOR_IMG_CACHE[url] === true){ show(url); }
+  else if(SURVIVOR_IMG_CACHE[url] === false){ show(baseUrl); }                       // missing variant -> base
+  else {                                                                              // unknown: show base now, swap if stance art loads
+    show(baseUrl);
+    if(url !== baseUrl){
+      const probe = new Image();
+      probe.onload = ()=>{ SURVIVOR_IMG_CACHE[url]=true; if(G.survivorId && survivorArtUrl(G.survivorId, G.lastSurvivorStance)===url) show(url); };
+      probe.onerror = ()=>{ SURVIVOR_IMG_CACHE[url]=false; };
+      probe.src = url;
+    }
+  }
   nameEl.textContent = G.survivorName || '';
 }
 
@@ -1301,7 +1502,7 @@ function setupTypewriterSkip() {
 function renderBeat(data){
   const prevHp = G.hp;
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
-  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||''; G.lastStance=(data.stance||'').toLowerCase().trim();
+  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||''; G.lastStance=(data.stance||'').toLowerCase().trim(); G.lastSurvivorStance=(data.survivorStance||'').toLowerCase().trim();
   document.getElementById('h-score').textContent = data.score;
   document.getElementById('h-events').textContent = data.eventsSurvived;
   updateHp(data.hp);
@@ -1311,10 +1512,13 @@ function renderBeat(data){
   const acts = document.getElementById('inv-actions'); if(acts) acts.innerHTML='';
   setSceneArt(data.location, data.narrative);
   setAudioScene(data.location, data.hp);
-  renderSurvivor();
+  renderSurvivor(data.survivorStance);
   renderNpc(data.npc, data.stance, data.outcome);
 
   G.lastNarrative = data.narrative || '';
+  // "God Is Coming" plays ONLY when Adam reaches his Full Demon Form, and loops
+  // through the ending. Any other beat stops it.
+  if(shouldPlayGodIsComing(data)) startGodIsComing(); else if(G.godIsComingActive) stopGodIsComing();
   if(data.gameOver){ showEnd(data); return; }
 
   // Damage / heal feedback — only after the beat fully renders
@@ -1344,6 +1548,40 @@ function showError(text){
   document.getElementById('choices').innerHTML = '';
 }
 
+// ─── "GOD IS COMING" — Adam's full-demon climax music ─────────────────────────
+// Looping track that ONLY plays when Adam is on-scene in his Full Demon Form (i.e.
+// data.npc === "adam" AND data.outcome is a sin-driven survival ending). It loops
+// until the ending screen is dismissed / the run resets. Never plays otherwise.
+let godIsComingAudio = null;
+function ensureGodIsComingAudio(){
+  if(godIsComingAudio) return godIsComingAudio;
+  const a = new Audio('music/God%20Is%20Coming.mp3');
+  a.loop = true; a.preload = 'auto'; a.volume = 0.7;
+  godIsComingAudio = a; return a;
+}
+function startGodIsComing(){
+  if(G.godIsComingActive) return;
+  G.godIsComingActive = true;
+  try { stopAmbient(); } catch(e){}      // mute the ambient bed while this plays
+  try { window.speechSynthesis.cancel(); } catch(e){}
+  const a = ensureGodIsComingAudio();
+  a.currentTime = 0;
+  // Browsers may block autoplay if the user hasn't interacted. In practice the user
+  // has clicked many times by ending, so this should always resolve.
+  a.play().catch(()=>{});
+}
+function stopGodIsComing(){
+  G.godIsComingActive = false;
+  if(godIsComingAudio){ try{ godIsComingAudio.pause(); godIsComingAudio.currentTime=0; }catch(e){} }
+}
+// Should the music trigger for THIS beat? Strict gate: Adam + full demon form only.
+function shouldPlayGodIsComing(data){
+  if(!data) return false;
+  const npc = (data.npc||'').toLowerCase().trim();
+  const outcome = (data.outcome||'').toLowerCase().trim();
+  return npc === 'adam' && DEMON_OUTCOMES.has(outcome);
+}
+
 // ─── END ───
 const ENDING_COLORS = {death:'#ef4444', escape:'#4ade80', transformation:'#a78bfa', lost:'#94a3b8', secret:'#fbbf24'};
 function showEnd(data){
@@ -1360,24 +1598,50 @@ function showEnd(data){
   narrate(data.narrative);
 }
 
-function restart(){
-  const { startEndpoint, startName, playerName, appearance } = G;
-  G = { sessionId:null, playerName, choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance, busy:false, startEndpoint, startName, pendingAction:null };
-  document.getElementById('end').classList.remove('show');
-  document.getElementById('game').style.display='flex';
-  showLoader(); // cover the old scene immediately so it isn't shown while the new run loads
-  join2();
+// Build a clean per-run state. Preserves only the player identity / login mode —
+// every transient field (inventory, traits, npc, location, stances, items rolled at
+// start, etc.) is reset, so nothing leaks from the previous run.
+function freshGameState(keepIdentity){
+  const id = keepIdentity || {};
+  return {
+    sessionId: null,
+    playerName: id.playerName || '',
+    startEndpoint: id.startEndpoint || '/auth/guest',
+    startName: id.startName ?? null,
+    // Run-scoped — wiped every restart:
+    choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'',
+    appearance:null, lastNarrative:'', busy:false, pendingAction:null,
+    npc:'', lastOutcome:'', lastStance:'', lastSurvivorStance:'',
+    survivorId:null, survivorName:'', startItems:[],
+    godIsComingActive:false,
+  };
 }
-// restart helper: re-create a session for the same player and begin again.
-async function join2(){
+// "Play Again" — wipe the run's state and ALWAYS route back to character selection
+// (per spec). The player picks a survivor again, rolls a fresh starting inventory,
+// and only THEN does a new story begin.
+function restart(){
+  const { startEndpoint, startName, playerName } = G;
+  stopGodIsComing();
+  G = freshGameState({ startEndpoint, startName, playerName });
+  document.getElementById('end').classList.remove('show');
+  document.getElementById('game').style.display='none';
+  hideLoader();
+  // Open a new server session for this player, then show the character creator.
+  reopenSessionAndShowCreator();
+}
+async function reopenSessionAndShowCreator(){
   try {
     const opts = {method:'POST', headers:{'Content-Type':'application/json'}};
     if(G.startName != null) opts.body = JSON.stringify({username: G.startName});
     const res = await fetch(`${API}${G.startEndpoint}`, opts);
     const data = await res.json();
     G.sessionId = data.sessionId; G.playerName = data.playerName;
-    await beginStory();
-  } catch(e){ showError('Could not start a new run. '+e.message); }
+    showCreator();
+  } catch(e){
+    // If the session can't be reopened, fall back to the main menu so the user isn't stuck.
+    showError('Could not start a new run. '+e.message);
+    goToMenu();
+  }
 }
 
 // ─── RETURN TO MENU (with confirmation) ───
@@ -1398,8 +1662,9 @@ function goToMenu(){
   hideLogin();
   document.getElementById('auth-msg').textContent='';
   startHomeTheme();
-  // Drop the abandoned run's state.
-  G = { sessionId:null, playerName:'', choices:[], score:0, hp:100, traits:[], items:[], events:0, location:'', appearance:null, busy:false, startEndpoint:'/auth/guest', startName:null, pendingAction:null };
+  // Drop the abandoned run's state completely (no identity carry).
+  stopGodIsComing();
+  G = freshGameState();
   loadLeaderboard('splash-leaderboard');
 }
 
@@ -1413,9 +1678,11 @@ async function loadLeaderboard(elId){
     const rows = await res.json();
     const head = '<div class="lb-title">🏆 Top Survivors</div>';
     if(!rows.length){ el.innerHTML = head+'<div class="lb-empty">No survivors yet — be the first.</div>'; return; }
-    el.innerHTML = head + rows.map((r,i)=>
+    // Render at most 10 entries, side-by-side in a 2-column grid (5 per column).
+    const top = rows.slice(0, 10);
+    el.innerHTML = head + '<div class="lb-grid">' + top.map((r,i)=>
       `<div class="lb-row"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(r.playerName)}</span><span class="lb-score">${r.finalScore}<span style="color:var(--muted);font-size:10px;"> · ${r.eventsSurvived}ev</span></span></div>`
-    ).join('');
+    ).join('') + '</div>';
   } catch(e){ el.innerHTML=''; }
 }
 
@@ -1452,9 +1719,22 @@ document.getElementById('caution').addEventListener('click', function dismissCau
 
 // ─── FIXED SCREEN: scale the 1280x720 stage to fit the window (letterboxed, no scroll) ───
 (function(){
+  // Desktop: scale the fixed 1280x720 stage to fit. Phones: bypass scaling, use a
+  // native responsive layout (body.mobile-mode + orientation class drives the CSS).
   function fitStage(){
-    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
-    document.documentElement.style.setProperty('--stage-scale', s);
+    const w = window.innerWidth, h = window.innerHeight;
+    // A "mobile" viewport is any short axis: phone portrait OR phone landscape.
+    const mobile = (w <= 900) || (h <= 520);
+    const body = document.body;
+    body.classList.toggle('mobile-mode', mobile);
+    body.classList.toggle('mobile-portrait', mobile && h >= w);
+    body.classList.toggle('mobile-landscape', mobile && w > h);
+    if(mobile){
+      document.documentElement.style.setProperty('--stage-scale', 1);
+    } else {
+      const s = Math.min(w / 1280, h / 720);
+      document.documentElement.style.setProperty('--stage-scale', s);
+    }
   }
   window.addEventListener('resize', fitStage);
   window.addEventListener('orientationchange', fitStage);

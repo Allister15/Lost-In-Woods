@@ -57,12 +57,23 @@ public class StoryService {
 
 	// Begin the endless story for an existing session: seed the prompt (with the
 	// player's character description, if any) and ask for the opening beat.
-	public StoryResponse start(Long sessionId, String appearance) {
+	public StoryResponse start(Long sessionId, String appearance, List<String> startingItems) {
 		GameSession session = requireSession(sessionId);
 		String system = GameMasterPrompt.SYSTEM_PROMPT;
 		if (appearance != null && !appearance.isBlank()) {
 			system = system + "\n\n### PLAYER CHARACTER\nThe survivor is " + appearance
 					+ " Weave their appearance into the narration naturally when it fits.";
+		}
+		// Character-specific opening inventory, rolled per run (may be empty = start with nothing).
+		if (startingItems != null) {
+			if (startingItems.isEmpty()) {
+				system = system + "\n\n### STARTING INVENTORY\nThe survivor begins this run with NOTHING in hand:"
+						+ " set the opening beat's \"items\" to an EMPTY list. They must scavenge for any gear in the forest.";
+			} else {
+				system = system + "\n\n### STARTING INVENTORY\nThe survivor begins this run carrying EXACTLY these items: "
+						+ String.join(", ", startingItems)
+						+ ". Set the opening beat's \"items\" to this exact list and acknowledge the gear naturally in the narration.";
+			}
 		}
 		List<ChatMessagePayload> messages = new ArrayList<>();
 		messages.add(new ChatMessagePayload("system", system));
@@ -82,9 +93,21 @@ public class StoryService {
 			seed.add(new ChatMessagePayload("system", GameMasterPrompt.SYSTEM_PROMPT));
 			return seed;
 		});
+		// Re-state the run's CURRENT inventory in the user message every turn. The 12-message
+		// context window can drop earlier item updates, and this anchors the AI to real state —
+		// so choices and narration only ever reference items the player actually has (no "compass"
+		// bug). See "STRICT INVENTORY CONSISTENCY" in the system prompt.
+		Beat prev = lastBeat.get(sessionId);
+		String inventoryLine;
+		if (prev == null || prev.items() == null || prev.items().isEmpty()) {
+			inventoryLine = "Current inventory: (empty — the player carries nothing).";
+		} else {
+			inventoryLine = "Current inventory: " + String.join(", ", prev.items())
+					+ ". Do NOT reference items outside this list.";
+		}
 		messages.add(new ChatMessagePayload("user",
 				"The player chose: " + (choiceText == null ? "" : choiceText.trim())
-						+ ". Continue the story and provide the next beat."));
+						+ ". " + inventoryLine + " Continue the story and provide the next beat."));
 		return generate(sessionId, session, true);
 	}
 
@@ -110,6 +133,7 @@ public class StoryService {
 					prev != null ? prev.location() : "dense_forest",
 					prev != null ? prev.npc() : "",
 					prev != null ? prev.stance() : "",
+					prev != null ? prev.survivorStance() : "",
 					"For a heartbeat the world blurs and slips sideways. You blink it away and steady yourself, the woods pressing close.",
 					FALLBACK_CHOICES,
 					session.getCurrentHealth(),
@@ -158,6 +182,7 @@ public class StoryService {
 				beat.location(),
 				beat.npc(),
 				beat.stance(),
+				beat.survivorStance(),
 				beat.narrative(),
 				session.isGameOver() ? List.of() : beat.choices(),
 				session.isGameOver(),
@@ -195,7 +220,7 @@ public class StoryService {
 	}
 
 	private StoryResponse terminal(GameSession session) {
-		return new StoryResponse(session.getId(), "dense_forest", "", "", "This run has already ended.",
+		return new StoryResponse(session.getId(), "dense_forest", "", "", "", "This run has already ended.",
 				List.of(), true, session.getEnding(), null, session.getCurrentHealth(), session.getCurrentScore(),
 				List.of(), List.of(), session.getEventsSurvived(), session.getFinalScore());
 	}
@@ -236,6 +261,7 @@ public class StoryService {
 			String location = node.path("location").asText("dense_forest");
 			String npc = node.path("npc").asText("");
 			String stance = node.path("stance").asText("");
+			String survivorStance = node.path("survivor_stance").asText("");
 			String narrative = node.path("narrative").asText("");
 			String outcome = node.path("outcome").asText("continue");
 			String ending = node.hasNonNull("ending") ? node.get("ending").asText() : null;
@@ -271,7 +297,7 @@ public class StoryService {
 
 			while (traits.size() > 6) traits.remove(traits.size() - 1);
 			while (items.size() > 6) items.remove(items.size() - 1);
-			return new Beat(location, npc, stance, narrative, choices, hp, score, traits, items, outcome, ending);
+			return new Beat(location, npc, stance, survivorStance, narrative, choices, hp, score, traits, items, outcome, ending);
 		}
 		catch (Exception e) {
 			return null; // unparseable — let generate() preserve the run's state
@@ -299,7 +325,7 @@ public class StoryService {
 	}
 
 	// Parsed view of one AI beat.
-	private record Beat(String location, String npc, String stance, String narrative, List<ChoiceView> choices, int hp, int score,
+	private record Beat(String location, String npc, String stance, String survivorStance, String narrative, List<ChoiceView> choices, int hp, int score,
 						List<TraitView> traits, List<String> items, String outcome, String ending) {
 	}
 }

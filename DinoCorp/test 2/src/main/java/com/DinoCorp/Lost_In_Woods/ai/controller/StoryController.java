@@ -23,7 +23,7 @@ public class StoryController {
 	// Begin the AI playthrough for a session, with the chosen character (Epic 1).
 	@PostMapping("/start")
 	public ResponseEntity<StoryResponse> start(@RequestBody StoryStartRequest request) {
-		return ResponseEntity.ok(storyService.start(request.sessionId(), describe(request)));
+		return ResponseEntity.ok(storyService.start(request.sessionId(), describe(request), request.startingItems()));
 	}
 
 	// Turn the appearance selections into a one-line character description for the AI

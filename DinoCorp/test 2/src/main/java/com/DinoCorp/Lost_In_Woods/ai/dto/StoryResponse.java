@@ -8,6 +8,7 @@ public record StoryResponse(
         String location,
         String npc,
         String stance,
+        String survivorStance,
         String narrative,
         List<ChoiceView> choices,
         boolean gameOver,
