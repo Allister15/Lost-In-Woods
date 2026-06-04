@@ -105,9 +105,32 @@ public class StoryService {
 			inventoryLine = "Current inventory: " + String.join(", ", prev.items())
 					+ ". Do NOT reference items outside this list.";
 		}
+		String lower = choiceText == null ? "" : choiceText.toLowerCase();
+		boolean isTrade = lower.contains("trade") || lower.contains("give") || lower.contains("offer")
+				|| lower.contains("exchange") || lower.contains("barter") || lower.contains("hand over")
+				|| lower.contains("deal") || lower.contains("bargain");
+		boolean isArrow = lower.contains("shoot") || lower.contains("fire") || lower.contains("arrow")
+				|| lower.contains("loose") || lower.contains("nock") || lower.contains("draw bow")
+				|| lower.contains("quiver") || lower.contains("aim");
+		boolean isCrowbar = lower.contains("crowbar") || lower.contains("pry") || lower.contains("wedge")
+				|| lower.contains("lever") || lower.contains("force open") || lower.contains("break open");
+		boolean isBandage = lower.contains("bandage") || lower.contains("bind") || lower.contains("wrap")
+				|| lower.contains("dress") || lower.contains("tend") || lower.contains("patch");
+		String tradeReminder = isTrade
+				? " TRADE REMINDER: if the narration describes the player handing an item to an NPC, that item MUST be REMOVED from \"items\" this beat — do NOT return both the given item and the received item."
+				: "";
+		String arrowReminder = isArrow
+				? " ARROW REMINDER: if an arrow is shot or fired in this beat, \"Quiver (arrows)\" MUST be REMOVED from \"items\" — do NOT keep the quiver after firing."
+				: "";
+		String crowbarReminder = isCrowbar
+				? " CROWBAR REMINDER: the crowbar is a permanent tool — using it does NOT remove it from \"items\". Keep it in the array after this use."
+				: "";
+		String bandageReminder = isBandage
+				? " BANDAGE REMINDER: if bandages are used to heal or bind a wound this beat, \"Bandages\" MUST be REMOVED from \"items\" — they are consumed on use."
+				: "";
 		messages.add(new ChatMessagePayload("user",
 				"The player chose: " + (choiceText == null ? "" : choiceText.trim())
-						+ ". " + inventoryLine + " Continue the story and provide the next beat."));
+						+ ". " + inventoryLine + tradeReminder + arrowReminder + crowbarReminder + bandageReminder + " Continue the story and provide the next beat."));
 		return generate(sessionId, session, true);
 	}
 

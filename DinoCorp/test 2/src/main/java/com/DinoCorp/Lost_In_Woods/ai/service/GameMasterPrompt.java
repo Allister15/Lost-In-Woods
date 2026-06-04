@@ -148,6 +148,19 @@ public final class GameMasterPrompt {
 			4) Choices that depend on an item must read naturally even without it (e.g. "Cut the rope" only if they
 			   have a blade — otherwise offer "Pull at the knot" or similar). Match choices to the kit they actually
 			   hold.
+			5) TRADES — CRITICAL: When a trade is narrated (player gives item A to an NPC in exchange for item B),
+			   item A MUST be ABSENT from "items" in this beat's output. Do NOT keep item A alongside item B —
+			   the player physically handed it over. Before you finalize "items", check: if A was given away and B
+			   was received, the array must contain B but NOT A. Returning both is a hard error. No exceptions.
+			6) ARROWS — CRITICAL: If the narrative describes the player shooting, firing, loosing, or releasing an
+			   arrow in any form, "Quiver (arrows)" (or any quiver variant) MUST be removed from "items" this beat.
+			   Do NOT leave the quiver in "items" after an arrow is fired. Check before outputting — if the quiver
+			   is still in the array after a shot, delete it. Silently keeping arrows after firing is a hard error.
+			7) CROWBAR — NEVER CONSUMED: The crowbar is a permanent tool. Using it (prying, forcing, striking) does
+			   NOT remove it from "items". It stays after every use. Only remove it if the narrative explicitly says
+			   it breaks, is lost, stolen, or destroyed — never on routine use.
+			8) BANDAGES — ALWAYS CONSUMED: Every time the player uses bandages to heal or bind a wound, "Bandages"
+			   MUST be removed from "items" this beat. One use = gone. Do NOT keep bandages after use.
 			Each survivor has a SIGNATURE KIT that fits them — when they find, use, or lose gear, prefer their own kit:
 			- Runa: Survival Knife, Flint and Steel, Water Canteen, Dried Meat Strips.
 			- Kane: Compound Bow, Quiver (arrows), Water Canteen, Berries.
@@ -158,6 +171,32 @@ public final class GameMasterPrompt {
 			A run may START with some, all, or NONE of these (set per run via STARTING INVENTORY). If they start with
 			nothing, they must scavenge — and found gear should still suit the survivor and the dark forest.
 
+			### CRITICAL ITEM RULES — BOW, ARROWS, & TOOLS
+			**BOW + ARROWS (for Kane and anyone with bow gear):**
+			- Arrows (Quiver) REQUIRE the Compound Bow to be present. If the player has only arrows but no bow, they CANNOT shoot.
+			- NEVER offer an arrow-shooting choice if "Compound Bow" is not in the current "items" list.
+			- When the player USES arrows to shoot, BOTH conditions must be met: (1) Compound Bow is in items, (2) Quiver (arrows) is in items.
+			- EACH TIME arrows are used/fired, they are CONSUMED. Remove "Quiver (arrows)" from items immediately after use unless explicitly found/resupplied in the narration.
+			- If arrows are used up, remove them permanently. Do NOT silently restore them on later beats. The player must find new arrows to shoot again.
+			- ARROW CONSUMPTION IS NON-NEGOTIABLE: if the narrative describes the player shooting, loosing, firing, or
+			  releasing an arrow in ANY way, "Quiver (arrows)" (or any quiver variant) MUST be absent from "items" in
+			  this beat's output. Check "items" before outputting — if the quiver is still there after an arrow was
+			  fired, remove it. Do not leave it in "items" under any circumstance.
+
+			**CROWBAR (for Old Morrow and similar survivors):**
+			- Crowbar is ALWAYS a TOOL for prying, breaking, opening, forcing — NEVER food, NEVER consumable.
+			- Do NOT offer "Eat the crowbar" or treat it as sustenance under any circumstance.
+			- Crowbar choices might include: "Pry open the chest", "Wedge it under the door", "Use it as a weapon", "Crowbar the lock".
+			- CROWBAR IS NOT CONSUMED BY USE: using the crowbar to pry, break, or force something does NOT remove it
+			  from "items". It stays in the player's inventory after use. Only remove it if the narrative explicitly
+			  describes it breaking, being confiscated, thrown away, or irretrievably lost.
+
+			**BANDAGES (consumable — used up on heal):**
+			- Bandages are a ONE-USE consumable. When the player uses bandages to bind a wound, treat an injury, or
+			  heal themselves, REMOVE "Bandages" from "items" immediately this beat.
+			- Do NOT keep bandages in "items" after they have been used. They are spent. One use = gone.
+			- If the player finds or receives new bandages later, add them back then.
+
 			### GAINING & USING ITEMS THROUGHOUT A RUN
 			Items are a CORE part of survival — the player should gain and lose them continuously, not just at start.
 			Across the run, the player can RECEIVE RANDOM things at any time (no fixed schedule), through MANY routes:
@@ -165,7 +204,8 @@ public final class GameMasterPrompt {
 			  branch, washed up by the stream, in a hollow log, dropped in the path.
 			- LOOTING — pried from a body the player just got past, scavenged from a ruin, taken from a defeated foe.
 			- GIFTS / TRADES — handed to the player by an NPC (the Keeper, a dwarf, a sin in "kind" disguise — the gift
-			  may be a bait). Trades cost something the player already carries.
+			  may be a bait). Trades cost something the player already carries. REMOVE the traded-away item from
+			  "items" immediately this beat — it is gone the moment the player hands it over.
 			- CRAFTING / FIELD-IMPROV — improvised from materials (a torch from a branch + flint, a sling from cord).
 			- LUCK / WEIRDNESS — the woods sometimes leave a small offering for survivors who notice.
 			Items can be MUNDANE (a length of rope, a tin cup, a candle stub, a strip of cloth, a smooth stone) or
@@ -181,6 +221,8 @@ public final class GameMasterPrompt {
 			  not a separate menu — they count toward the 4. Never offer to use an item they don't have (see HARD RULES).
 			- When the player picks a USE choice, RESOLVE it: consume / damage / drop the item as appropriate and update
 			  "items" accordingly. A canteen empties; bandages get used up; a key opens one door then breaks or stays.
+			  **SPECIAL: Quiver (arrows) — when the player shoots/fires arrows, IMMEDIATELY remove "Quiver (arrows)" from items this beat.
+			  The arrows are depleted. Do NOT allow shooting again on a later beat without finding new arrows first.**
 			- Item use can SAVE the player (heal, escape, repel a sin briefly) or BACKFIRE (the locket whispers, the
 			  swamp-water makes them sick) — keep hidden danger honest both ways.
 			- The frontend also exposes a "use item" hint via player messages ("the player chose: Use <Item>") — when you
