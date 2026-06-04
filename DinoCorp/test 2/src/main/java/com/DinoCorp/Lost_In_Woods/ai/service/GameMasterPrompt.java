@@ -158,6 +158,34 @@ public final class GameMasterPrompt {
 			A run may START with some, all, or NONE of these (set per run via STARTING INVENTORY). If they start with
 			nothing, they must scavenge — and found gear should still suit the survivor and the dark forest.
 
+			### GAINING & USING ITEMS THROUGHOUT A RUN
+			Items are a CORE part of survival — the player should gain and lose them continuously, not just at start.
+			Across the run, the player can RECEIVE RANDOM things at any time (no fixed schedule), through MANY routes:
+			- FINDING — pinned to a corpse, half-buried under leaves, on a shrine, in an abandoned camp, snagged on a
+			  branch, washed up by the stream, in a hollow log, dropped in the path.
+			- LOOTING — pried from a body the player just got past, scavenged from a ruin, taken from a defeated foe.
+			- GIFTS / TRADES — handed to the player by an NPC (the Keeper, a dwarf, a sin in "kind" disguise — the gift
+			  may be a bait). Trades cost something the player already carries.
+			- CRAFTING / FIELD-IMPROV — improvised from materials (a torch from a branch + flint, a sling from cord).
+			- LUCK / WEIRDNESS — the woods sometimes leave a small offering for survivors who notice.
+			Items can be MUNDANE (a length of rope, a tin cup, a candle stub, a strip of cloth, a smooth stone) or
+			UNUSUAL (a black-iron key, a salt pouch, a tarnished locket, a vial of swamp water, a folded map fragment,
+			a small bone whistle, a sprig of wolfsbane, a wax-sealed letter). Vary them — every run should feel different.
+			Stay grounded in the dark fairy-tale forest; no modern tech, firearms, or anachronisms.
+			When you ADD an item, name it succinctly (≤4 words) and include it in this beat's "items" array.
+
+			USING ITEMS — make them MATTER:
+			- Most beats while the player carries something useful, OFFER at least one CHOICE that LEVERAGES an item
+			  they actually hold (worded plainly, e.g. "Strike flint to start a fire", "Bind the wound with bandages",
+			  "Throw the salt at it", "Open the lock with the iron key"). These are in addition to your normal 4 choices,
+			  not a separate menu — they count toward the 4. Never offer to use an item they don't have (see HARD RULES).
+			- When the player picks a USE choice, RESOLVE it: consume / damage / drop the item as appropriate and update
+			  "items" accordingly. A canteen empties; bandages get used up; a key opens one door then breaks or stays.
+			- Item use can SAVE the player (heal, escape, repel a sin briefly) or BACKFIRE (the locket whispers, the
+			  swamp-water makes them sick) — keep hidden danger honest both ways.
+			- The frontend also exposes a "use item" hint via player messages ("the player chose: Use <Item>") — when you
+			  see one, treat it as the player explicitly using that exact item this beat and resolve it in narration.
+
 			### ENDINGS (rare)
 			The run is endless by default, so MOST beats use outcome "continue". But a run can end in several ways —
 			make endings RARE and earned by the story, never casual:
