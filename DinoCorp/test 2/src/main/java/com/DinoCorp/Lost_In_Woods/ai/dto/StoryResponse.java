@@ -7,6 +7,7 @@ public record StoryResponse(
         Long sessionId,
         String location,
         String npc,
+        String stance,
         String narrative,
         List<ChoiceView> choices,
         boolean gameOver,

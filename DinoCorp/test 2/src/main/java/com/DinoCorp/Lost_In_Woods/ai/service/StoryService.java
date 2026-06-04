@@ -109,6 +109,7 @@ public class StoryService {
 			beat = new Beat(
 					prev != null ? prev.location() : "dense_forest",
 					prev != null ? prev.npc() : "",
+					prev != null ? prev.stance() : "",
 					"For a heartbeat the world blurs and slips sideways. You blink it away and steady yourself, the woods pressing close.",
 					FALLBACK_CHOICES,
 					session.getCurrentHealth(),
@@ -156,6 +157,7 @@ public class StoryService {
 				session.getId(),
 				beat.location(),
 				beat.npc(),
+				beat.stance(),
 				beat.narrative(),
 				session.isGameOver() ? List.of() : beat.choices(),
 				session.isGameOver(),
@@ -193,7 +195,7 @@ public class StoryService {
 	}
 
 	private StoryResponse terminal(GameSession session) {
-		return new StoryResponse(session.getId(), "dense_forest", "", "This run has already ended.",
+		return new StoryResponse(session.getId(), "dense_forest", "", "", "This run has already ended.",
 				List.of(), true, session.getEnding(), null, session.getCurrentHealth(), session.getCurrentScore(),
 				List.of(), List.of(), session.getEventsSurvived(), session.getFinalScore());
 	}
@@ -233,6 +235,7 @@ public class StoryService {
 			JsonNode node = objectMapper.readTree(extractJson(raw));
 			String location = node.path("location").asText("dense_forest");
 			String npc = node.path("npc").asText("");
+			String stance = node.path("stance").asText("");
 			String narrative = node.path("narrative").asText("");
 			String outcome = node.path("outcome").asText("continue");
 			String ending = node.hasNonNull("ending") ? node.get("ending").asText() : null;
@@ -268,7 +271,7 @@ public class StoryService {
 
 			while (traits.size() > 6) traits.remove(traits.size() - 1);
 			while (items.size() > 6) items.remove(items.size() - 1);
-			return new Beat(location, npc, narrative, choices, hp, score, traits, items, outcome, ending);
+			return new Beat(location, npc, stance, narrative, choices, hp, score, traits, items, outcome, ending);
 		}
 		catch (Exception e) {
 			return null; // unparseable — let generate() preserve the run's state
@@ -296,7 +299,7 @@ public class StoryService {
 	}
 
 	// Parsed view of one AI beat.
-	private record Beat(String location, String npc, String narrative, List<ChoiceView> choices, int hp, int score,
+	private record Beat(String location, String npc, String stance, String narrative, List<ChoiceView> choices, int hp, int score,
 						List<TraitView> traits, List<String> items, String outcome, String ending) {
 	}
 }

@@ -11,6 +11,8 @@
   --green:#4ade80;--green-dim:#166534;--green-dark:#052e16;
   --red:#ef4444;--amber:#fbbf24;--ink:#060806;
   --border:rgba(74,222,128,0.13);--text:#c8d8c8;--muted:#4a5e4a;
+  --accent:#c2a86a;--accent-dim:#6e5e38;--frame:rgba(150,130,80,0.30);
+  --murk:radial-gradient(ellipse at 50% 22%, #0e1d14 0%, #080f0b 58%, #03070a 100%);
   --font-t:'Cinzel',serif;--font-b:'Crimson Text',serif;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--font-b);color:var(--text);font-size:18px;}
@@ -99,10 +101,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .trait{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid;font-weight:600;}
 .trait.good{background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.4);color:#4ade80;}
 .trait.bad{background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.4);color:#ef4444;}
-#scene-art{width:100%;height:200px;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;background:#050d05;}
-#scene-art svg{width:100%;height:100%;display:block;}
-#scene-art.img{background-size:cover;background-position:center;}
-#scene-art .env-ansi{font-family:'Courier New',monospace;font-size:9px;line-height:9px;color:#3fcf6a;white-space:pre;margin:0;padding:6px 10px;overflow:hidden;text-shadow:0 0 4px rgba(63,207,106,0.4);}
+/* ── Triptych: left portrait · center scene · right portrait (equal height) ── */
+/* ── Triptych: left portrait · WIDE center scene · right portrait ── */
+#scene-row{display:flex;gap:12px;align-items:flex-start;justify-content:center;margin-bottom:18px;}
+.scene-holder{position:relative;height:clamp(190px,30vw,290px);border:1px solid var(--frame);border-radius:8px;overflow:hidden;background:var(--murk);box-shadow:inset 0 0 40px rgba(0,0,0,0.72),0 4px 18px rgba(0,0,0,0.6);}
+.scene-holder.center{flex:1 1 auto;min-width:0;}                 /* center gets all the extra width */
+.actor-col{flex:0 0 clamp(82px,12vw,150px);display:flex;flex-direction:column;gap:8px;}  /* narrow portraits -> wider scene */
+.actor-col .scene-holder.side{width:100%;}
+.scene-holder.side img{width:100%;height:100%;object-fit:cover;object-position:center top;image-rendering:pixelated;display:none;position:relative;z-index:1;}
+#scene-antagonist.demon{animation:demonReveal 2.2s ease-in both;}
+/* "alone" / no-art frame: murky etched panel with a faint sigil — never flat black */
+.frame-glyph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:40px;color:rgba(160,175,150,0.10);text-shadow:0 0 22px rgba(0,0,0,0.85);pointer-events:none;z-index:0;}
+.scene-holder.has-art .frame-glyph{display:none;}
+.actor-name{text-align:center;font-family:var(--font-t);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);min-height:15px;text-shadow:0 1px 4px rgba(0,0,0,0.9);}
+#scene-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+#scene-bg svg{width:100%;height:100%;display:block;}
+#scene-bg .env-ansi{font-family:'Courier New',monospace;font-size:9px;line-height:9px;color:#3fcf6a;white-space:pre;margin:0;padding:6px 10px;overflow:hidden;text-shadow:0 0 4px rgba(63,207,106,0.4);}
+/* aged-metal L-corner brackets + inner vignette for a dark-fantasy frame */
+.framed::before{content:'';position:absolute;inset:5px;pointer-events:none;z-index:3;opacity:0.6;
+  background:linear-gradient(var(--accent),var(--accent)) left top/15px 2px no-repeat,linear-gradient(var(--accent),var(--accent)) left top/2px 15px no-repeat,linear-gradient(var(--accent),var(--accent)) right top/15px 2px no-repeat,linear-gradient(var(--accent),var(--accent)) right top/2px 15px no-repeat,linear-gradient(var(--accent),var(--accent)) left bottom/15px 2px no-repeat,linear-gradient(var(--accent),var(--accent)) left bottom/2px 15px no-repeat,linear-gradient(var(--accent),var(--accent)) right bottom/15px 2px no-repeat,linear-gradient(var(--accent),var(--accent)) right bottom/2px 15px no-repeat;}
+.scene-holder::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 38px rgba(0,0,0,0.7);}
+/* ── Story text box (etched dark-fantasy panel) ── */
+#story-box{position:relative;border:1px solid var(--frame);border-radius:8px;padding:6px 28px 28px;margin-bottom:24px;background:linear-gradient(180deg,rgba(10,18,12,0.82),rgba(5,11,8,0.9)),var(--murk);box-shadow:inset 0 0 55px rgba(0,0,0,0.6),0 4px 22px rgba(0,0,0,0.5);}
 #npc-panel{display:none;align-items:center;gap:12px;margin-bottom:14px;background:rgba(8,18,8,0.6);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
 .npc-portrait{width:56px;height:56px;border-radius:6px;background:#03130a center/cover no-repeat;border:1px solid var(--green-dim);display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-t);font-size:18px;flex-shrink:0;box-shadow:0 0 8px rgba(74,222,128,0.25);}
 .npc-img{height:84px;width:auto;max-width:92px;object-fit:contain;object-position:center bottom;image-rendering:pixelated;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(98,255,166,0.4));}
@@ -119,13 +139,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 #story-wrap{flex:1;overflow-y:auto;display:flex;justify-content:center;scrollbar-width:thin;scrollbar-color:var(--green-dim) transparent;background:linear-gradient(135deg, rgba(11,28,18,0.9) 0%, rgba(8,20,12,0.95) 50%, rgba(5,15,8,0.92) 100%);box-shadow:inset 0 0 80px rgba(0,0,0,0.6);}
 #story-wrap::before{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 100%, rgba(20,60,35,0.15) 0%, transparent 70%);z-index:0;}
 #story{max-width:760px;width:100%;padding:30px 30px 40px;position:relative;z-index:1;}
-#chap-label{font-size:11px;letter-spacing:4px;color:var(--green);text-transform:uppercase;margin-bottom:16px;border-left:2px solid var(--green-dim);padding-left:10px;}
-#scen-text{font-size:18px;line-height:1.85;color:#d4e8d4;margin-bottom:26px;white-space:pre-wrap;}
-#choices{display:flex;flex-direction:column;gap:11px;}
-.ch{background:rgba(5,15,5,0.75);border:1px solid rgba(74,222,128,0.14);border-radius:9px;padding:15px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:13px;transition:all 0.22s;text-align:left;color:#d4e8d4;font-family:var(--font-b);font-size:16px;line-height:1.5;}
-.ch:hover:not(:disabled){border-color:rgba(74,222,128,0.45);transform:translateX(5px);background:rgba(15,40,15,0.7);}
-.ch:disabled{cursor:default;opacity:0.55;}
-.ch-key{width:24px;height:24px;border-radius:5px;border:1px solid rgba(74,222,128,0.22);display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:10px;color:var(--green);flex-shrink:0;margin-top:1px;}
+#chap-label{font-size:13px;letter-spacing:5px;color:var(--accent);text-transform:uppercase;text-align:center;margin:0 -28px 22px;padding:15px 10px;border-bottom:1px solid var(--accent-dim);background:linear-gradient(180deg,rgba(40,32,14,0.28),transparent);text-shadow:0 0 10px rgba(0,0,0,0.7);}
+#scen-text{font-size:18px;line-height:1.85;color:#d8e6d4;margin-bottom:26px;white-space:pre-wrap;}
+#scen-text::first-letter{font-family:var(--font-t);font-size:2.7em;line-height:0.9;float:left;padding:4px 10px 0 0;color:var(--accent);text-shadow:0 0 14px rgba(194,168,106,0.4);}
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ch{position:relative;background:linear-gradient(180deg,rgba(13,24,16,0.92),rgba(6,13,9,0.94));border:1px solid var(--frame);border-radius:6px;padding:14px 16px 14px 22px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all 0.2s;text-align:left;color:#cbe0cb;font-family:var(--font-b);font-size:17px;line-height:1.5;box-shadow:inset 0 0 18px rgba(0,0,0,0.5);overflow:hidden;}
+.ch::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0.4;transition:opacity 0.2s;}
+.ch:hover:not(:disabled){border-color:var(--green);color:#eaffea;transform:translateY(-1px);box-shadow:inset 0 0 22px rgba(74,222,128,0.12),0 0 16px rgba(74,222,128,0.16);}
+.ch:hover:not(:disabled)::before{opacity:1;background:var(--green);}
+.ch:disabled{cursor:default;opacity:0.5;}
+.ch-key{width:25px;height:25px;border-radius:4px;border:1px solid var(--accent-dim);background:rgba(0,0,0,0.32);display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:11px;color:var(--accent);flex-shrink:0;margin-top:1px;}
 
 #loading{display:none;align-items:center;gap:12px;color:var(--muted);font-style:italic;font-size:14px;padding:10px 0;letter-spacing:1px;}
 #loading.show{display:flex;}
@@ -202,6 +225,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   #hud{gap:14px;}
   #story{padding:18px 16px 30px;}
   #scen-text{font-size:16px;}
+  #scene-row{height:170px;}
+  #choices{grid-template-columns:1fr;}
+  #story-box{padding:4px 16px 18px;}
+  #chap-label{margin:0 -16px 16px;}
   .splash-auth{width:90vw;max-width:320px;}
   .splash-credits{display:none;}
   #kb{display:none;}
@@ -298,12 +325,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   </div>
   <div id="story-wrap">
     <div id="story">
-      <div id="scene-art"></div>
-      <div id="npc-panel"></div>
+      <div id="scene-row">
+        <div class="actor-col">
+          <div class="scene-holder side framed"><div class="frame-glyph">✦</div><img id="scene-survivor" alt=""></div>
+          <div class="actor-name" id="survivor-name"></div>
+        </div>
+        <div class="scene-holder center framed"><div id="scene-bg"></div></div>
+        <div class="actor-col">
+          <div class="scene-holder side framed"><div class="frame-glyph">✦</div><img id="scene-antagonist" alt=""></div>
+          <div class="actor-name" id="antagonist-name"></div>
+        </div>
+      </div>
       <div id="traits-row"></div>
       <div id="inv-row"></div>
-      <div id="chap-label"></div>
-      <div id="scen-text"></div>
+      <div id="story-box">
+        <div id="chap-label"></div>
+        <div id="scen-text"></div>
+      </div>
       <div id="choices"></div>
       <div id="loading"><div class="ring"></div><span>The forest shifts around you…</span></div>
     </div>
@@ -733,6 +771,8 @@ function enterWoods(){
   stopHomeTheme();
   const p = PRESETS[PRESET_I];
   G.appearance = { character: p.name + ', ' + p.desc };
+  G.survivorId = p.id; // remember the chosen survivor so they appear all run
+  G.survivorName = p.name; // shown on the nameplate below their portrait
   document.getElementById('creator').classList.remove('show');
   document.getElementById('game').style.display='flex';
   // Auto-start ambient music (this click satisfies the browser autoplay gate).
@@ -803,19 +843,21 @@ function renderInventory(items, elId){
   el.innerHTML = '<span class="inv-label">🎒 Pack</span>' + items.map(i=>`<span class="inv-chip">${escapeHtml(i)}</span>`).join('');
 }
 // ─── ON-SCENE CHARACTER (antagonists / NPCs) ───
+// Names only — NEVER reveal which sin a character is (keeps the surprise).
 const NPC_NAMES = {
-  banner:'Banner · Wrath', yuri:'Yuri · Envy', felicia:'Felicia · Greed', nagi:'Nagi · Sloth',
-  vincent:'Vincent · Lust', sammuel:'Sammuel · Gluttony', adam:'Adam · Pride',
+  banner:'Banner', yuri:'Yuri', felicia:'Felicia', nagi:'Nagi',
+  vincent:'Vincent', sammuel:'Sammuel', adam:'Adam',
   ghost:'A Ghost', dwarf:'A Dwarf', transformed_man:'The Transformed Man', seeker:'The Seeker'
 };
 // ── The 7 Sins: real ANSI-art sprites with base / stance / demon-form tiers ──
-// COMBAT keywords trigger each sin's "attacking" stance; the rest are sin-specific.
-// Priority is top-to-bottom; first keyword hit wins, else the base form is used.
-const COMBAT = ['attack','lunge','charge','strike','swing','grab','claw','blade','knife','hatchet','axe','blood','slash','pounce','rush','throat','seize'];
+// COMBAT = active-violence words ONLY, so the "attacking" stance fires solely when a
+// fight is actually happening this scene. Otherwise a fitting non-attacking stance is
+// chosen, and if nothing notable is happening the BASE form (default) is used.
+const COMBAT = ['attack','lunge','charge','strike','swing','slash','claw','maul','pounce','bite','fight','brawl','stab','grapple','tackle','wound','blood'];
 const NPC_STANCES = {
   adam:[['attacking',COMBAT],['spiteful',['spite','sneer','contempt','mock','disdain','scorn','betray','condescend']],['pushing',['push','shove','force','drive you','herd','press']],['grinning',['grin','smile','smirk','charming','laugh','chuckle']],['relaxed',['calm','casual','leisure','reclin','ease','lean','idle','saunter']]],
   banner:[['attacking',COMBAT],['rage',['rage','fury','furious','snarl','roar','seethe','enraged','wild','berserk']],['resentment',['resent','grudge','bitter','glare','simmer','brood']],['grinning',['grin','smile','smirk','laugh','sneer']]],
-  felicia:[['attacking',COMBAT.concat(['snatch','steal','rob','clutch'])],['crying',['cry','sob','tears','weep','wail']],['sad',['sad','sorrow','mourn','forlorn','downcast','grief','despair']],['kind',['kind','gentle','smile','warm','help','soft','sooth','friendly','tender']]],
+  felicia:[['attacking',COMBAT],['crying',['cry','sob','tears','weep','wail']],['sad',['sad','sorrow','mourn','forlorn','downcast','grief','despair']],['kind',['kind','gentle','smile','warm','help','soft','sooth','friendly','tender']]],
   nagi:[['attacking',COMBAT],['drowsy',['drowsy','sleep','yawn','sluggish','heavy-lidded','tired','slow','doze']],['dragging',['drag','haul','pull','deadweight','slump','trudge','lug']],['fullvoid',['void','empty','hollow','blank','nothing','abyss','vacant','numb']]],
   sammuel:[['attacking',COMBAT],['gorging',['gorge','devour','eat','chew','feast','swallow','mouthful','ration','bite','gulp']],['hoarding',['hoard','stash','pocket','clutch','collect','greedy','grasp']],['ecstacy',['ecstasy','ecstatic','bliss','rapture','delight','euphor','moan']],['hollow',['hollow','empty','gaunt','starv','sallow','famish']]],
   vincent:[['attacking',COMBAT],['predator',['predator','stalk','prowl','hunt','circle','closing in','corner']],['possessive',['possess','mine','grip','claim','cling','obsess','own']],['seductive',['seduc','charm','allure','whisper','sweet','tempt','smile','beckon']],['rapturous',['rapture','rapturous','ecstasy','bliss','fervor','enthrall']]],
@@ -826,12 +868,14 @@ const NPC_DEMON = new Set(['adam','banner','felicia','nagi','sammuel','vincent',
 const DEMON_OUTCOMES = new Set(['escape','transformation','lost','secret']);
 const NPC_IMG_CACHE = {};
 
-// Pick which sprite file fits THIS scene — instant, local, no API.
-function npcArtUrl(id, narrative, outcome){
+// Pick which sprite fits THIS scene. The AI picks the stance (it understands the
+// scene); we only VALIDATE it against the NPC's real options. No keyword guessing —
+// that caused mismatches (e.g. "attacking" on a calm talk). Unknown/missing -> base.
+function npcArtUrl(id, outcome, stance){
   if(NPC_DEMON.has(id) && DEMON_OUTCOMES.has((outcome||'').toLowerCase())) return `assets/npc/${id}_demon.png`;
-  const t = (narrative||'').toLowerCase();
-  for(const [stance, kw] of (NPC_STANCES[id]||[])){ if(kw.some(w=>t.includes(w))) return `assets/npc/${id}_${stance}.png`; }
-  return `assets/npc/${id}.png`; // base form
+  const s = (stance||'').toLowerCase().trim();
+  if(s && s!=='base' && (NPC_STANCES[id]||[]).some(([st])=>st===s)) return `assets/npc/${id}_${s}.png`;
+  return `assets/npc/${id}.png`; // base / default form (neutral)
 }
 // Preload the 7 base forms so a sin appears the instant it enters a scene.
 function preloadNpcArt(){
@@ -843,23 +887,37 @@ function preloadNpcArt(){
 }
 preloadNpcArt();
 
-function renderNpc(id, narrative, outcome){
-  const panel = document.getElementById('npc-panel');
+// Antagonist fills the RIGHT frame; their name shows on the plaque below it.
+function renderNpc(id, stance, outcome){
+  const sprite = document.getElementById('scene-antagonist');
+  const holder = sprite.parentElement;
+  const nameEl = document.getElementById('antagonist-name');
   id = (id||'').toLowerCase().trim();
-  if(!id || !NPC_NAMES[id]){ panel.style.display='none'; panel.innerHTML=''; return; }
-  panel.style.display='flex';
-  const name = `<div class="npc-name">${escapeHtml(NPC_NAMES[id])}</div>`;
-  const fallback = ANSI_FIG[id] ? `<pre class="npc-ascii">${escapeHtml(buildAnsi(id))}</pre>` : `<div class="npc-portrait">?</div>`;
-  const url = npcArtUrl(id, narrative, outcome);
-  const cls = url.endsWith('_demon.png') ? 'npc-img demon' : 'npc-img'; // demon form fades in gradually
-  if(NPC_IMG_CACHE[url] === true){ panel.innerHTML = `<img class="${cls}" alt="" src="${url}">` + name; return; }
-  if(NPC_IMG_CACHE[url] === false){ panel.innerHTML = fallback + name; return; }
-  // Unknown yet: show the green fallback now, probe, and swap in the art when ready (if still this scene).
-  panel.innerHTML = fallback + name;
+  const clear = ()=>{ sprite.style.display='none'; sprite.className=''; holder.classList.remove('has-art'); };
+  if(!id || !NPC_NAMES[id]){ clear(); nameEl.textContent=''; return; } // alone -> murky etched frame + faint sigil
+  nameEl.textContent = NPC_NAMES[id]; // name only — never the sin
+  const url = npcArtUrl(id, outcome, stance);
+  const demon = url.endsWith('_demon.png'); // demon form fades in gradually
+  const show = ()=>{ sprite.src = url; sprite.className = demon?'demon':''; sprite.style.display='block'; holder.classList.add('has-art'); };
+  if(NPC_IMG_CACHE[url] === true){ show(); return; }
+  if(NPC_IMG_CACHE[url] === false){ clear(); return; } // no art yet (e.g. ghost/dwarf) -> name + sigil frame
+  // Unknown yet: keep the etched frame until the probe resolves, then show if still this scene.
+  clear();
   const probe = new Image();
-  probe.onload = ()=>{ NPC_IMG_CACHE[url]=true; if((G.npc||'')===id && npcArtUrl(G.npc, G.lastNarrative, G.lastOutcome)===url){ panel.innerHTML = `<img class="${cls}" alt="" src="${url}">` + name; } };
+  probe.onload = ()=>{ NPC_IMG_CACHE[url]=true; if((G.npc||'')===id && npcArtUrl(G.npc, G.lastOutcome, G.lastStance)===url) show(); };
   probe.onerror = ()=>{ NPC_IMG_CACHE[url]=false; };
   probe.src = url;
+}
+// The chosen survivor fills the LEFT frame and persists through the whole run.
+function renderSurvivor(){
+  const el = document.getElementById('scene-survivor');
+  const holder = el.parentElement;
+  const nameEl = document.getElementById('survivor-name');
+  if(!G.survivorId){ el.style.display='none'; holder.classList.remove('has-art'); nameEl.textContent=''; return; }
+  const url = `assets/char/${G.survivorId}.png`;
+  if(el.getAttribute('src') !== url) el.src = url;
+  el.style.display='block'; holder.classList.add('has-art');
+  nameEl.textContent = G.survivorName || '';
 }
 
 // ─── FOREST LOCATIONS (geometric 2D visuals) ───
@@ -926,22 +984,22 @@ function preloadEnvArt(){
 preloadEnvArt();
 
 function setSceneArt(loc, narrative){
-  const el = document.getElementById('scene-art');
+  const el = document.getElementById('scene-bg'); // background layer only; actors sit on top
   const base = (loc||'dense_forest').toLowerCase();
   const key = pickEnvArt(base, narrative); // fast, local choice of best-fitting art (e.g. cave vs yawning_cave)
   // 1) plain-text ANSI environment (assets/env/<base>.txt) still takes priority if you drop one in.
-  if(ENV_ANSI[base]){ el.classList.remove('img'); el.style.backgroundImage=''; el.innerHTML = `<pre class="env-ansi">${escapeHtml(ENV_ANSI[base])}</pre>`; return; }
+  if(ENV_ANSI[base]){ el.style.backgroundImage=''; el.innerHTML = `<pre class="env-ansi">${escapeHtml(ENV_ANSI[base])}</pre>`; return; }
   if(ENV_ANSI[base] === undefined){
     ENV_ANSI[base] = false; // probe once
     fetch(`assets/env/${base}.txt`).then(r=> r.ok ? r.text() : Promise.reject()).then(t=>{ ENV_ANSI[base]=t; if((G.location||'').toLowerCase()===base) setSceneArt(G.location, G.lastNarrative); }).catch(()=>{});
   }
   // 2) provided background image (assets/bg/<key>.png), else 3) geometric SVG fallback.
-  if(BG_CACHE[key] === false){ el.classList.remove('img'); el.style.backgroundImage=''; el.innerHTML = locationSVG(base); return; }
-  if(BG_CACHE[key]){ el.classList.add('img'); el.style.backgroundImage = `url('${BG_CACHE[key]}')`; el.innerHTML=''; return; }
-  el.classList.remove('img'); el.style.backgroundImage=''; el.innerHTML = locationSVG(base);
+  if(BG_CACHE[key] === false){ el.style.backgroundImage=''; el.innerHTML = locationSVG(base); return; }
+  if(BG_CACHE[key]){ el.style.backgroundImage = `url('${BG_CACHE[key]}')`; el.innerHTML=''; return; }
+  el.style.backgroundImage=''; el.innerHTML = locationSVG(base);
   const url = `assets/bg/${key}.png`;
   const img = new Image();
-  img.onload = ()=>{ BG_CACHE[key]=url; if((G.location||'').toLowerCase()===base){ el.classList.add('img'); el.style.backgroundImage=`url('${url}')`; el.innerHTML=''; } };
+  img.onload = ()=>{ BG_CACHE[key]=url; if((G.location||'').toLowerCase()===base){ el.style.backgroundImage=`url('${url}')`; el.innerHTML=''; } };
   img.onerror = ()=>{ BG_CACHE[key]=false; };
   img.src = url;
 }
@@ -982,7 +1040,7 @@ function setupTypewriterSkip() {
 
 function renderBeat(data){
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
-  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||'';
+  G.events=data.eventsSurvived; G.choices=data.choices||[]; G.location=data.location; G.lastNarrative=data.narrative||''; G.npc=(data.npc||'').toLowerCase().trim(); G.lastOutcome=data.outcome||''; G.lastStance=(data.stance||'').toLowerCase().trim();
   document.getElementById('h-score').textContent = data.score;
   document.getElementById('h-events').textContent = data.eventsSurvived;
   updateHp(data.hp);
@@ -990,7 +1048,8 @@ function renderBeat(data){
   renderInventory(G.items, 'inv-row');
   setSceneArt(data.location, data.narrative);
   setAudioScene(data.location, data.hp);
-  renderNpc(data.npc, data.narrative, data.outcome);
+  renderSurvivor();
+  renderNpc(data.npc, data.stance, data.outcome);
 
   G.lastNarrative = data.narrative || '';
   if(data.gameOver){ showEnd(data); return; }

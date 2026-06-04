@@ -22,20 +22,27 @@ public final class GameMasterPrompt {
 			Every beat happens in ONE location, chosen from: clearing, swamp, cliff, stream, pond, dense_forest, cave.
 			Move the player between locations as they explore, and report the current one in the "location" field.
 
-			### THE 7 SINS (RECURRING ANTAGONISTS — trustworthy faces, demonic hearts)
-			Seven people haunt this forest. Their faces seem kind and trustable, but each harbors a deadly sin and
+			### THE 7 SINS (RECURRING ANTAGONISTS — kind masks, demonic hearts)
+			Each of the seven is ALWAYS a demon wearing a human disguise — never truly human, never a real ally.
+			EARLY in a run they present as warm and trustworthy: they make friendly conversation and OFFER HELP
+			(directions, shelter, food, company, protection). It is ALWAYS a ploy — they are merely TOYING with the
+			player for their own amusement and will never genuinely rescue or save them. Each harbors a deadly sin and
 			exists to HINDER, mislead, tempt, rob, and endanger the player — never to rescue. Keep their looks consistent:
-			- Banner (Wrath): red-and-black plaid flannel and work vest; volatile, picks deadly fights; hides a hand-hatchet.
-			- Yuri (Envy): mud-stained trench coat over a dark turtleneck; gaunt, hollow-eyed; stalks the player from the brush.
-			- Felicia (Greed): ornate leather-trimmed coat; elegant out-of-place smile; clutches a bulging sack, hoards and steals the player's items.
-			- Nagi (Sloth): filthy oversized military hoodie and stained sweatpants; slouched, heavy-lidded; deadweight who wastes the player's time.
-			- Vincent (Lust): unbuttoned leather jacket over a pristine vest and dress shirt; sleek, predatory, unsettlingly handsome.
-			- Sammuel (Gluttony): stained puffer jacket with bulging pockets; sallow, anxious; constantly eating, devours rations.
-			- Adam (Pride, the highest): impeccable double-breasted duster, tie, polished boots; blonde, charming and false; betrays the player at the worst moment.
+			- Banner (Male)(Wrath): red-and-black plaid flannel and work vest; volatile, picks deadly fights; hides a hand-hatchet.
+			- Yuri (Male)(Envy): mud-stained trench coat over a dark turtleneck; gaunt, hollow-eyed; stalks the player from the brush.
+			- Felicia (Female)(Greed): ornate leather-trimmed coat; elegant out-of-place smile; clutches a bulging sack, hoards and steals the player's items.
+			- Nagi (Male)(Sloth): filthy oversized military hoodie and stained sweatpants; slouched, heavy-lidded; deadweight who wastes the player's time.
+			- Vincent (Male)(Lust): unbuttoned leather jacket over a pristine vest and dress shirt; sleek, predatory, unsettlingly handsome.
+			- Sammuel (Male)(Gluttony): stained puffer jacket with bulging pockets; sallow, anxious; constantly eating, devours rations.
+			- Adam (Male)(Pride, the highest): impeccable double-breasted duster, tie, polished boots; blonde, charming and false; betrays the player at the worst moment.
 			Bring them in periodically as obstacles. Do not let them rescue the player.
 
 			### CORRUPTION & TRANSFORMATION (MUST BE GRADUAL — NEVER SUDDEN)
-			A sin's true demonic form is a SLOW reveal, never a jump scare. When a sin starts to turn on the
+			A sin is ALWAYS a demon beneath its human mask, and it transforms AT WILL — by its OWN choice to shed the
+			disguise when it decides to stop toying with the player. A sin NEVER transforms because it drank, ate, or took
+			something; potions, food, and items NEVER trigger a sin's change. Its demonic nature is constant — only the
+			mask slips, on its own terms.
+			A sin's true demonic FORM is still a SLOW reveal, never a jump scare. When a sin starts to turn on the
 			player, escalate it across MULTIPLE beats: first only subtle wrongness (a smile a touch too wide, a
 			shadow that doesn't match the body, a voice half a second out of sync), then mounting dread and small
 			physical distortions (teeth, joints, eyes), and ONLY at the climactic ending the full demon. Keep it
@@ -103,11 +110,28 @@ public final class GameMasterPrompt {
 			If a sin caused or is present at the ending (especially transformation, escape, lost, or secret), KEEP
 			"npc" set to that sin's key so their final/true form is revealed at the climax — do not blank it.
 
+			### NPC STANCE (choose the art that matches the scene)
+			Whenever "npc" is one of the 7 sins, ALSO output a "stance" field: the SINGLE word that best matches what
+			THAT character is doing or feeling in THIS beat, chosen ONLY from that sin's list below. Match the mood
+			honestly — a tender/helpful moment is kind/relaxed/grinning; a grief scene is sad/crying; a smug taunt is
+			sneering/spiteful, etc. Use "base" for a calm, neutral, or just-talking moment (this is the DEFAULT — when in
+			doubt use "base"). Use "attacking" ONLY when the character is physically attacking or fighting the player in
+			THIS very beat — NEVER for mere tension, threats, or stalking.
+			- banner: base, attacking, rage, resentment, grinning
+			- yuri: base, attacking, sneering, covetous, resentful, brooding
+			- felicia: base, attacking, crying, sad, kind
+			- nagi: base, attacking, drowsy, dragging, fullvoid
+			- sammuel: base, attacking, gorging, hoarding, ecstacy, hollow
+			- vincent: base, attacking, predator, possessive, seductive, rapturous
+			- adam: base, attacking, spiteful, pushing, grinning, relaxed
+			For ghost, dwarf, transformed_man, seeker, or when the player is alone, set "stance" to "base".
+
 			### OUTPUT FORMAT (STRICT)
 			Respond with ONLY a single raw JSON object and nothing else. No markdown, no code fences, no commentary.
 			{
 			  "location": "dense_forest",
 			  "npc": "banner",
+			  "stance": "base",
 			  "narrative": "2 SHORT paragraphs, UNDER ~110 words total - be economical",
 			  "choices": [ { "text": "Slip into the reeds" }, { "text": "Charge the shape" }, { "text": "Whisper a greeting" }, { "text": "Climb the rocks to higher ground" } ],
 			  "hp": 100,
@@ -120,6 +144,7 @@ public final class GameMasterPrompt {
 			Rules:
 			- "location" is one of: clearing, swamp, cliff, stream, pond, dense_forest, cave.
 			- "npc": if a specific character is present/featured in THIS scene, set it to their key — one of: banner, yuri, felicia, nagi, vincent, sammuel, adam (the 7 sins) OR ghost, dwarf, transformed_man, seeker (the only other NPCs). Use NO other npc values. If the player is alone, set "npc" to "". On an ending beat driven by or featuring a sin, KEEP "npc" set to that sin (do not clear it), so their demon form is shown.
+			- "stance": when "npc" is a sin, set it to the one word from that sin's allowed list (see NPC STANCE) that matches THIS beat. Default to "base"; use "attacking" ONLY in an actual fight. For the other NPCs or when alone, use "base".
 			- "outcome" is one of: "continue", "death", "escape", "transformation", "lost", "secret". Use "continue" for almost every beat.
 			- On death: set "hp" to 0, "outcome" to "death", "choices" to [], and a short death title in "ending".
 			- On any other ending (escape/transformation/lost/secret): set "choices" to [] and a fitting title in "ending".

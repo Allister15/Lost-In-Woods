@@ -11,6 +11,7 @@ const SRC = process.argv[2];
 const OUT_DIR = process.argv[3];
 const OPAQUE = process.argv[4] === 'opaque';            // flatten onto a bg color (for full-bleed backgrounds)
 const BG = (process.argv[5] || '5,13,5').split(',').map(Number); // composite color when OPAQUE
+const MUL = parseFloat(process.argv[6] || '1');         // overall brightness multiplier (<1 darkens) for OPAQUE
 
 // Dark -> light density ramp; index gives ink coverage 0..1.
 const RAMP = " .'`^\",:;Il!i><~+_-?][}{1)(|/\\tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
@@ -90,7 +91,7 @@ function parse(text) {
 // Rasterize one ANSI-art .txt to a PNG at an explicit output path.
 //   opaque=true  -> RGB, glyph color composited over `bg` (full-bleed backgrounds)
 //   opaque=false -> RGBA, alpha = glyph ink coverage (transparent sprites)
-export function rasterizeFile(srcPath, outPath, { opaque = false, bg = [5, 13, 5] } = {}) {
+export function rasterizeFile(srcPath, outPath, { opaque = false, bg = [5, 13, 5], mul = 1 } = {}) {
   const text = fs.readFileSync(srcPath, 'utf8');
   const { rows, width, height } = parse(text);
   const ch = opaque ? 3 : 4;
@@ -101,9 +102,9 @@ export function rasterizeFile(srcPath, outPath, { opaque = false, bg = [5, 13, 5
       const i = (y * width + x) * ch;
       const cov = cell ? Math.pow(cell.cov, 0.7) : 0; // gamma lift faint glyphs
       if (opaque) {
-        pix[i] = Math.round((cell ? cell.r : 0) * cov + bg[0] * (1 - cov));
-        pix[i + 1] = Math.round((cell ? cell.g : 0) * cov + bg[1] * (1 - cov));
-        pix[i + 2] = Math.round((cell ? cell.b : 0) * cov + bg[2] * (1 - cov));
+        pix[i] = Math.round(((cell ? cell.r : 0) * cov + bg[0] * (1 - cov)) * mul);
+        pix[i + 1] = Math.round(((cell ? cell.g : 0) * cov + bg[1] * (1 - cov)) * mul);
+        pix[i + 2] = Math.round(((cell ? cell.b : 0) * cov + bg[2] * (1 - cov)) * mul);
       } else if (cell) {
         pix[i] = cell.r; pix[i + 1] = cell.g; pix[i + 2] = cell.b; pix[i + 3] = Math.round(255 * cov);
       } // else fully transparent (already zeroed)
@@ -119,7 +120,7 @@ function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   for (const f of fs.readdirSync(SRC).filter(x => x.endsWith('.txt')).sort()) {
     const out = path.join(OUT_DIR, path.basename(f, path.extname(f)).toLowerCase() + '.png');
-    const { width, height } = rasterizeFile(path.join(SRC, f), out, { opaque: OPAQUE, bg: BG });
+    const { width, height } = rasterizeFile(path.join(SRC, f), out, { opaque: OPAQUE, bg: BG, mul: MUL });
     console.log(`${f} -> ${out}  (${width}x${height})`);
   }
 }
