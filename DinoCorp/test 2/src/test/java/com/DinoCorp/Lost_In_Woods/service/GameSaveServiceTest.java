@@ -53,7 +53,7 @@ class GameSaveServiceTest {
         UUID token = UUID.randomUUID();
         StoryResponse beat = new StoryResponse(
                 42L, "swamp", "nagi", "drowsy", "base", "A two sentence beat. It escalates now.",
-                List.of(), false, null, null, 80, 350, List.of(), List.of("Survival Knife"), 7, 0);
+                List.of(), false, null, null, 80, 350, List.of(), List.of("Survival Knife"), 7, 0, List.of());
         GameSession s = GameSession.builder()
                 .id(42L)   // the persistent session id the frontend keeps using for /story/choose
                 .playerName("Runa").guest(false).resumeToken(token)
@@ -88,7 +88,7 @@ class GameSaveServiceTest {
 
         StoryResponse beat = new StoryResponse(
                 9L, "cave", "", "base", "base", "Cold drips. Something moves.",
-                List.of(), false, null, null, 73, 410, List.of(), List.of("Knife"), 6, 0);
+                List.of(), false, null, null, 73, 410, List.of(), List.of("Knife"), 6, 0, List.of());
         service.saveBeat(9L, beat);
 
         assertNotNull(s.getLastBeatJson());

@@ -1,8 +1,10 @@
 package com.DinoCorp.Lost_In_Woods.ai.service;
 
+import com.DinoCorp.Lost_In_Woods.ai.dto.AchievementView;
 import com.DinoCorp.Lost_In_Woods.ai.dto.ChoiceView;
 import com.DinoCorp.Lost_In_Woods.ai.dto.StoryResponse;
 import com.DinoCorp.Lost_In_Woods.ai.dto.TraitView;
+import com.DinoCorp.Lost_In_Woods.service.AchievementTrackerService;
 import com.DinoCorp.Lost_In_Woods.ai.provider.AIProvider;
 import com.DinoCorp.Lost_In_Woods.ai.provider.AIProvider.ChatMessagePayload;
 import com.DinoCorp.Lost_In_Woods.exception.ResourceNotFoundException;
@@ -40,6 +42,7 @@ public class StoryService {
 
 	private final AIProvider aiProvider;
 	private final GameSessionRepository sessionRepository;
+	private final AchievementTrackerService achievementTracker;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	// Transcript per session. In-memory: a playthrough lives for one server run.
@@ -70,9 +73,11 @@ public class StoryService {
 			"The cold here has a weight to it, pressing on your chest like a hand. Just out of sight, branches part and settle, marking the passage of something unseen.",
 			"Every instinct screams at you to run, but the dark gives you nowhere to go. Ahead, the shadows gather into a shape that watches you without eyes.");
 
-	public StoryService(AIProvider aiProvider, GameSessionRepository sessionRepository) {
+	public StoryService(AIProvider aiProvider, GameSessionRepository sessionRepository,
+						AchievementTrackerService achievementTracker) {
 		this.aiProvider = aiProvider;
 		this.sessionRepository = sessionRepository;
+		this.achievementTracker = achievementTracker;
 	}
 
 	// Begin the endless story for an existing session: seed the prompt (with the
@@ -253,6 +258,14 @@ public class StoryService {
 		}
 		sessionRepository.save(session);
 
+		// Evaluate the 24 achievements for this beat; any newly unlocked are returned to the
+		// frontend (it fires a toast for each). Uses the live, post-clamp hp/score.
+		int badTraits = (int) beat.traits().stream().filter(TraitView::bad).count();
+		List<AchievementView> newAchievements = achievementTracker.evaluate(session,
+				new AchievementTrackerService.BeatSnapshot(beat.npc(), beat.stance(), beat.survivorStance(),
+						session.getCurrentHealth(), session.getCurrentScore(), beat.items(), badTraits, endingType));
+		if (session.isGameOver()) achievementTracker.clearRun(sessionId);
+
 		return new StoryResponse(
 				session.getId(),
 				beat.location(),
@@ -269,7 +282,8 @@ public class StoryService {
 				beat.traits(),
 				beat.items(),
 				session.getEventsSurvived(),
-				session.getFinalScore());
+				session.getFinalScore(),
+				newAchievements);
 	}
 
 	// finalScore trait contribution. Endless runs end in death, so bad traits are penalized.
@@ -350,7 +364,7 @@ public class StoryService {
 	private StoryResponse terminal(GameSession session) {
 		return new StoryResponse(session.getId(), "dense_forest", "", "", "", "This run has already ended.",
 				List.of(), true, session.getEnding(), null, session.getCurrentHealth(), session.getCurrentScore(),
-				List.of(), List.of(), session.getEventsSurvived(), session.getFinalScore());
+				List.of(), List.of(), session.getEventsSurvived(), session.getFinalScore(), List.of());
 	}
 
 	// Non-death endings (Epic 11). Death is handled separately via hp.
