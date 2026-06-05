@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 // Drives the endless AI-controlled story. Holds each run's transcript in memory,
 // asks the LLM (the game master) for the next beat after every choice, and tracks
@@ -59,84 +60,104 @@ public class StoryService {
 	// player's character description, if any) and ask for the opening beat.
 	public StoryResponse start(Long sessionId, String appearance, List<String> startingItems) {
 		GameSession session = requireSession(sessionId);
+		seedTranscript(sessionId, buildSystemForStart(appearance, startingItems));
+		return generate(sessionId, session, false, null);
+	}
+
+	// Streaming variant of start(): builds the transcript identically, then streams
+	// narrative deltas to the sink while the opening beat is generated.
+	public StoryResponse startStream(Long sessionId, String appearance, List<String> startingItems,
+									 Consumer<String> narrativeSink) {
+		GameSession session = requireSession(sessionId);
+		String system = buildSystemForStart(appearance, startingItems);
+		seedTranscript(sessionId, system);
+		return generate(sessionId, session, false, narrativeSink);
+	}
+
+	private String buildSystemForStart(String appearance, List<String> startingItems) {
 		String system = GameMasterPrompt.SYSTEM_PROMPT;
 		if (appearance != null && !appearance.isBlank()) {
-			system = system + "\n\n### PLAYER CHARACTER\nThe survivor is " + appearance
+			system += "\n\n### PLAYER CHARACTER\nThe survivor is " + appearance
 					+ " Weave their appearance into the narration naturally when it fits.";
 		}
-		// Character-specific opening inventory, rolled per run (may be empty = start with nothing).
 		if (startingItems != null) {
 			if (startingItems.isEmpty()) {
-				system = system + "\n\n### STARTING INVENTORY\nThe survivor begins this run with NOTHING in hand:"
+				system += "\n\n### STARTING INVENTORY\nThe survivor begins this run with NOTHING in hand:"
 						+ " set the opening beat's \"items\" to an EMPTY list. They must scavenge for any gear in the forest.";
 			} else {
-				system = system + "\n\n### STARTING INVENTORY\nThe survivor begins this run carrying EXACTLY these items: "
+				system += "\n\n### STARTING INVENTORY\nThe survivor begins this run carrying EXACTLY these items: "
 						+ String.join(", ", startingItems)
 						+ ". Set the opening beat's \"items\" to this exact list and acknowledge the gear naturally in the narration.";
 			}
 		}
+		return system;
+	}
+
+	private void seedTranscript(Long sessionId, String system) {
 		List<ChatMessagePayload> messages = new ArrayList<>();
 		messages.add(new ChatMessagePayload("system", system));
 		messages.add(new ChatMessagePayload("user", "Begin the run: the opening beat."));
 		transcripts.put(sessionId, messages);
-		return generate(sessionId, session, false);
 	}
 
 	// Apply the player's choice and ask the AI for the next beat.
 	public StoryResponse choose(Long sessionId, String choiceText) {
 		GameSession session = requireSession(sessionId);
-		if (session.isGameOver()) {
-			return terminal(session);
-		}
+		if (session.isGameOver()) return terminal(session);
+		appendChoiceMessage(sessionId, choiceText);
+		return generate(sessionId, session, true, null);
+	}
+
+	// Streaming variant of choose(): same setup, but pipes narrative deltas as they
+	// arrive from the model. Returns the full StoryResponse once generation finishes.
+	public StoryResponse chooseStream(Long sessionId, String choiceText, Consumer<String> narrativeSink) {
+		GameSession session = requireSession(sessionId);
+		if (session.isGameOver()) return terminal(session);
+		appendChoiceMessage(sessionId, choiceText);
+		return generate(sessionId, session, true, narrativeSink);
+	}
+
+	// Build and add the user message for a choice. Includes the inventory anchor
+	// and the action-specific item-consumption reminders the prompt relies on.
+	private void appendChoiceMessage(Long sessionId, String choiceText) {
 		List<ChatMessagePayload> messages = transcripts.computeIfAbsent(sessionId, id -> {
 			List<ChatMessagePayload> seed = new ArrayList<>();
 			seed.add(new ChatMessagePayload("system", GameMasterPrompt.SYSTEM_PROMPT));
 			return seed;
 		});
-		// Re-state the run's CURRENT inventory in the user message every turn. The 12-message
-		// context window can drop earlier item updates, and this anchors the AI to real state —
-		// so choices and narration only ever reference items the player actually has (no "compass"
-		// bug). See "STRICT INVENTORY CONSISTENCY" in the system prompt.
 		Beat prev = lastBeat.get(sessionId);
-		String inventoryLine;
-		if (prev == null || prev.items() == null || prev.items().isEmpty()) {
-			inventoryLine = "Current inventory: (empty — the player carries nothing).";
-		} else {
-			inventoryLine = "Current inventory: " + String.join(", ", prev.items())
-					+ ". Do NOT reference items outside this list.";
-		}
+		String inventoryLine = (prev == null || prev.items() == null || prev.items().isEmpty())
+				? "Current inventory: (empty — the player carries nothing)."
+				: "Current inventory: " + String.join(", ", prev.items()) + ". Do NOT reference items outside this list.";
 		String lower = choiceText == null ? "" : choiceText.toLowerCase();
-		boolean isTrade = lower.contains("trade") || lower.contains("give") || lower.contains("offer")
-				|| lower.contains("exchange") || lower.contains("barter") || lower.contains("hand over")
-				|| lower.contains("deal") || lower.contains("bargain");
-		boolean isArrow = lower.contains("shoot") || lower.contains("fire") || lower.contains("arrow")
-				|| lower.contains("loose") || lower.contains("nock") || lower.contains("draw bow")
-				|| lower.contains("quiver") || lower.contains("aim");
-		boolean isCrowbar = lower.contains("crowbar") || lower.contains("pry") || lower.contains("wedge")
-				|| lower.contains("lever") || lower.contains("force open") || lower.contains("break open");
-		boolean isBandage = lower.contains("bandage") || lower.contains("bind") || lower.contains("wrap")
-				|| lower.contains("dress") || lower.contains("tend") || lower.contains("patch");
-		String tradeReminder = isTrade
-				? " TRADE REMINDER: if the narration describes the player handing an item to an NPC, that item MUST be REMOVED from \"items\" this beat — do NOT return both the given item and the received item."
-				: "";
-		String arrowReminder = isArrow
-				? " ARROW REMINDER: if an arrow is shot or fired in this beat, \"Quiver (arrows)\" MUST be REMOVED from \"items\" — do NOT keep the quiver after firing."
-				: "";
-		String crowbarReminder = isCrowbar
-				? " CROWBAR REMINDER: the crowbar is a permanent tool — using it does NOT remove it from \"items\". Keep it in the array after this use."
-				: "";
-		String bandageReminder = isBandage
-				? " BANDAGE REMINDER: if bandages are used to heal or bind a wound this beat, \"Bandages\" MUST be REMOVED from \"items\" — they are consumed on use."
-				: "";
+		String reminders = "";
+		if (matchAny(lower, "trade","give","offer","exchange","barter","hand over","deal","bargain"))
+			reminders += " TRADE REMINDER: if the narration describes the player handing an item to an NPC, that item MUST be REMOVED from \"items\" this beat.";
+		if (matchAny(lower, "shoot","fire","arrow","loose","nock","draw bow","quiver","aim"))
+			reminders += " ARROW REMINDER: if an arrow is shot or fired, \"Quiver (arrows)\" MUST be REMOVED from \"items\".";
+		if (matchAny(lower, "crowbar","pry","wedge","lever","force open","break open"))
+			reminders += " CROWBAR REMINDER: crowbar is permanent — using it does NOT remove it from \"items\".";
+		if (matchAny(lower, "bandage","bind","wrap","dress","tend","patch"))
+			reminders += " BANDAGE REMINDER: bandages are consumed on use — REMOVE from \"items\" this beat.";
 		messages.add(new ChatMessagePayload("user",
-				"The player chose: " + (choiceText == null ? "" : choiceText.trim())
-						+ ". " + inventoryLine + tradeReminder + arrowReminder + crowbarReminder + bandageReminder + " Continue the story and provide the next beat."));
-		return generate(sessionId, session, true);
+				"The player chose: " + (choiceText == null ? "" : choiceText.trim()) + ". "
+						+ inventoryLine + reminders + " Continue the story and provide the next beat."));
 	}
 
-	private StoryResponse generate(Long sessionId, GameSession session, boolean advance) {
+	private boolean matchAny(String s, String... needles) {
+		for (String n : needles) if (s.contains(n)) return true;
+		return false;
+	}
+
+	private StoryResponse generate(Long sessionId, GameSession session, boolean advance, Consumer<String> narrativeSink) {
 		List<ChatMessagePayload> messages = transcripts.get(sessionId);
-		String raw = aiProvider.ask(new AIProvider.ChatRequest(contextWindow(messages))).message();
+		String raw;
+		if (narrativeSink == null) {
+			raw = aiProvider.ask(new AIProvider.ChatRequest(contextWindow(messages))).message();
+		} else {
+			NarrativeStreamer streamer = new NarrativeStreamer(narrativeSink);
+			raw = aiProvider.askStream(new AIProvider.ChatRequest(contextWindow(messages)), streamer).message();
+		}
 		messages.add(new ChatMessagePayload("assistant", raw));
 
 		Beat beat = parse(raw);
@@ -232,14 +253,66 @@ public class StoryService {
 		return total;
 	}
 
+	// How many of the MOST RECENT assistant beats are kept raw (full JSON) in the
+	// context window. Older assistant turns get compressed to a tiny state record
+	// (location/npc/items/hp) — that's enough for continuity but ~10x smaller, so
+	// every request after the first few beats spends far fewer input tokens.
+	private static final int KEEP_RECENT_RAW = 2;
+
 	private List<ChatMessagePayload> contextWindow(List<ChatMessagePayload> messages) {
+		// First trim to the last MAX_CONTEXT_MESSAGES messages (plus system at index 0).
+		List<ChatMessagePayload> base;
 		if (messages.size() <= MAX_CONTEXT_MESSAGES) {
-			return messages;
+			base = messages;
+		} else {
+			base = new ArrayList<>(MAX_CONTEXT_MESSAGES);
+			base.add(messages.get(0));
+			base.addAll(messages.subList(messages.size() - (MAX_CONTEXT_MESSAGES - 1), messages.size()));
 		}
-		List<ChatMessagePayload> window = new ArrayList<>();
-		window.add(messages.get(0)); // system prompt
-		window.addAll(messages.subList(messages.size() - (MAX_CONTEXT_MESSAGES - 1), messages.size()));
-		return window;
+
+		// Count assistant messages in the window so we know which ones are "recent".
+		int assistantSeen = 0;
+		int totalAssistants = 0;
+		for (ChatMessagePayload m : base) if ("assistant".equals(m.role())) totalAssistants++;
+
+		// Walk and rewrite: keep the last KEEP_RECENT_RAW assistant turns raw; for
+		// older assistants, replace their JSON content with a short state summary.
+		List<ChatMessagePayload> trimmed = new ArrayList<>(base.size());
+		for (ChatMessagePayload m : base) {
+			if (!"assistant".equals(m.role())) { trimmed.add(m); continue; }
+			assistantSeen++;
+			boolean isRecent = (totalAssistants - assistantSeen) < KEEP_RECENT_RAW;
+			if (isRecent) { trimmed.add(m); continue; }
+			String summary = summarizeAssistant(m.content());
+			trimmed.add(summary == null ? m : new ChatMessagePayload("assistant", summary));
+		}
+		return trimmed;
+	}
+
+	// Squash a past beat's full JSON down to just the run-state fields the model
+	// needs to maintain continuity: location, npc, items, hp. Drops the narrative,
+	// choices, traits, stances, etc. which are no longer useful as context.
+	private String summarizeAssistant(String raw) {
+		try {
+			JsonNode n = objectMapper.readTree(extractJson(raw));
+			StringBuilder sb = new StringBuilder("{\"location\":\"")
+					.append(n.path("location").asText("dense_forest"))
+					.append("\",\"npc\":\"").append(n.path("npc").asText(""))
+					.append("\",\"hp\":").append(n.path("hp").asInt(100))
+					.append(",\"items\":[");
+			if (n.has("items") && n.get("items").isArray()) {
+				boolean first = true;
+				for (JsonNode it : n.get("items")) {
+					if (!first) sb.append(',');
+					sb.append('"').append(it.asText().replace("\"", "\\\"")).append('"');
+					first = false;
+				}
+			}
+			sb.append("]}");
+			return sb.toString();
+		} catch (Exception e) {
+			return null; // can't summarize — leave raw
+		}
 	}
 
 	private StoryResponse terminal(GameSession session) {
@@ -350,5 +423,89 @@ public class StoryService {
 	// Parsed view of one AI beat.
 	private record Beat(String location, String npc, String stance, String survivorStance, String narrative, List<ChoiceView> choices, int hp, int score,
 						List<TraitView> traits, List<String> items, String outcome, String ending) {
+	}
+
+	// Consumes streamed token chunks from the AI provider, watches for the
+	// "narrative":"…" field in the growing JSON, and forwards each new decoded
+	// piece of that field's text to a downstream sink (the HTTP response writer).
+	// Other JSON fields (choices, traits, items, etc.) are NOT streamed — they
+	// arrive together as part of the final non-streaming parse, so the client gets
+	// a complete StoryResponse at the end.
+	//
+	// This is intentionally a forgiving, manual JSON scan rather than a full
+	// streaming parser: it handles the common case (well-formed JSON, no surprises
+	// before the narrative field) and degrades gracefully when content arrives
+	// faster than we can resolve a JSON escape — we just wait for more bytes.
+	static final class NarrativeStreamer implements Consumer<String> {
+		private final StringBuilder cumulative = new StringBuilder(4096);
+		private final Consumer<String> sink;
+		private int valueStart = -1;     // index of first char after the opening quote
+		private int emitted = 0;          // chars of decoded narrative we've already sent
+
+		NarrativeStreamer(Consumer<String> sink) { this.sink = sink; }
+
+		@Override
+		public void accept(String chunk) {
+			if (chunk == null || chunk.isEmpty()) return;
+			cumulative.append(chunk);
+			if (valueStart < 0) {
+				int marker = cumulative.indexOf("\"narrative\"");
+				if (marker < 0) return;
+				int colon = cumulative.indexOf(":", marker + 11);
+				if (colon < 0) return;
+				int quote = -1;
+				for (int i = colon + 1; i < cumulative.length(); i++) {
+					char c = cumulative.charAt(i);
+					if (c == '"') { quote = i; break; }
+					if (!Character.isWhitespace(c)) return; // unexpected — give up streaming
+				}
+				if (quote < 0) return;
+				valueStart = quote + 1;
+			}
+			emitDecoded();
+		}
+
+		// Walk from valueStart, decoding JSON escapes, building the live narrative
+		// string, and emitting any portion not yet sent. Stops at the unescaped
+		// closing quote (after which no more narrative will arrive).
+		private void emitDecoded() {
+			StringBuilder decoded = new StringBuilder();
+			int i = valueStart;
+			while (i < cumulative.length()) {
+				char c = cumulative.charAt(i);
+				if (c == '\\') {
+					if (i + 1 >= cumulative.length()) break; // need next char
+					char esc = cumulative.charAt(i + 1);
+					switch (esc) {
+						case 'n':  decoded.append('\n'); break;
+						case 't':  decoded.append('\t'); break;
+						case 'r':  decoded.append('\r'); break;
+						case '"':  decoded.append('"');  break;
+						case '\\': decoded.append('\\'); break;
+						case '/':  decoded.append('/');  break;
+						case 'u':
+							if (i + 5 >= cumulative.length()) return; // need 4 hex digits
+							try {
+								int cp = Integer.parseInt(cumulative.substring(i + 2, i + 6), 16);
+								decoded.append((char) cp);
+							} catch (NumberFormatException ignored) { decoded.append('?'); }
+							i += 4;
+							break;
+						default: decoded.append(esc); break;
+					}
+					i += 2;
+				} else if (c == '"') {
+					break; // end of the narrative string — stop streaming
+				} else {
+					decoded.append(c);
+					i++;
+				}
+			}
+			if (decoded.length() > emitted) {
+				String fresh = decoded.substring(emitted);
+				emitted = decoded.length();
+				try { sink.accept(fresh); } catch (Exception ignore) { /* client gone */ }
+			}
+		}
 	}
 }

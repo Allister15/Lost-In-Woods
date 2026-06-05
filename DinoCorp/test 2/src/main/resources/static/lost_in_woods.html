@@ -16,6 +16,10 @@
   --accent:#c2a86a;--accent-dim:#6e5e38;--frame:rgba(150,130,80,0.30);
   --murk:radial-gradient(ellipse at 50% 22%, #0e1d14 0%, #080f0b 58%, #03070a 100%);
   --font-t:'Cinzel',serif;--font-b:'Crimson Text',serif;
+  /* User-adjustable typography multiplier (Audio Settings -> Text Scale, 50-200%).
+     MUST default to 1 here; without it every calc(... * var(--text-scale)) becomes
+     invalid and the browser falls back to its default tiny size. */
+  --text-scale:1;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--font-b);color:var(--text);font-size:18px;}
 /* FIXED SCREEN: a 1280x720 stage scaled uniformly to fit any window (letterboxed). All
@@ -1407,25 +1411,84 @@ function enterWoods(){
 }
 
 // ─── STORY ───
+// ─── STREAMING (Server-Sent Events) ───
+// Read an SSE response and dispatch `delta` / `done` / `error` events to callbacks.
+// Frames are "event: <name>\ndata: <json>\n\n" — we buffer until we see "\n\n".
+async function consumeStream(url, body, onDelta, onDone, onError){
+  let res;
+  try {
+    res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Accept':'text/event-stream'}, body: JSON.stringify(body)});
+  } catch(e){ onError(e.message || 'network error'); return; }
+  if(!res.ok){ onError(await errMsg(res)); return; }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder('utf-8');
+  let buf = '';
+  for(;;){
+    const {value, done} = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, {stream:true});
+    // Each event ends with a blank line (\n\n). Split and process whole frames.
+    let idx;
+    while((idx = buf.indexOf('\n\n')) >= 0){
+      const frame = buf.slice(0, idx); buf = buf.slice(idx + 2);
+      let evt = 'message', data = '';
+      for(const line of frame.split('\n')){
+        if(line.startsWith('event:')) evt = line.slice(6).trim();
+        else if(line.startsWith('data:')) data += line.slice(5).trim();
+      }
+      if(!data) continue;
+      try {
+        const payload = JSON.parse(data);
+        if(evt === 'delta') onDelta(payload);
+        else if(evt === 'done') { onDone(payload); return; }
+        else if(evt === 'error') { onError(payload); return; }
+      } catch(e){ /* malformed frame — skip */ }
+    }
+  }
+  onError('stream ended without a done frame');
+}
+
+// Streaming buffer. We DON'T paint each delta into the DOM as it arrives — that
+// looked like a stuttery uncontrolled typewriter you couldn't skip, and the scroll
+// kept jumping to the latest line so you couldn't read what came before. Instead
+// we silently collect chunks; the final, full narrative is then displayed in one
+// proper typewriter pass that you can skip by clicking/tapping anywhere.
+function beginStreamingNarrative(){
+  const el = document.getElementById('scen-text');
+  el.textContent = '';
+  G.streamingNarrative = true;
+  let buf = '';
+  return {
+    onDelta(text){
+      if(typeof text === 'string') buf += text;   // silent buffer; no DOM writes
+    },
+    // Returns the streamed-buffer fallback (used if the parsed narrative is empty).
+    getBuffer(){ return buf; },
+    clear(){ G.streamingNarrative = false; }
+  };
+}
+
 async function beginStory(){
   showLoader(); setBusy(true);
+  // Non-streaming path: small overhead win over SSE for models that don't actually
+  // stream (e.g. owl-alpha). The streaming endpoints still exist server-side; flip
+  // back if/when a stream-capable model is selected.
   try {
-    const res = await fetch(`${API}/story/start`,{
+    const body = Object.assign({sessionId: G.sessionId}, G.appearance||{}, {startingItems: G.startItems||[]});
+    const res = await fetch(`${API}/story/start`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(Object.assign({sessionId: G.sessionId}, G.appearance||{}, {startingItems: G.startItems||[]}))
+      body: JSON.stringify(body)
     });
     if(!res.ok) throw new Error(await errMsg(res));
-    renderBeat(await res.json());
+    const data = await res.json();
     hideLoader();
-    // Play boo sound after first game beat if H.D easter egg
-    if(G.easterEggPDF) {
-      booAudio = new Audio('music/boo.mp3');
-      booAudio.volume = masterVolume * sfxVolume * 0.8;
-      booAudio.play().catch(e => console.log('Boo sound failed:', e));
+    renderBeat(data);
+    if(G.easterEggPDF){
+      try { booAudio = new Audio('music/boo.mp3'); booAudio.volume = masterVolume * sfxVolume * 0.8; booAudio.play().catch(()=>{}); } catch(_){}
     }
   } catch(e){
     hideLoader();
-    showError('The AI storyteller is unavailable. '+e.message);
+    showError('The AI storyteller is unavailable. ' + (e.message || e));
   } finally { setBusy(false); }
 }
 
@@ -1443,21 +1506,20 @@ async function choose(idx){
   stopLocAudio(true);
   const moveSrc = getMoveTrack(c.text, G.location);
   if(moveSrc) startMoveAudio(moveSrc);
-  showLoader(); // full loading screen while the AI generates the next beat
+  showLoader(); // covers the old scene until the new beat arrives
   try {
-    const res = await fetch(`${API}/story/choose`,{
+    const res = await fetch(`${API}/story/choose`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({sessionId: G.sessionId, choice: text})
     });
     if(!res.ok) throw new Error(await errMsg(res));
     const data = await res.json();
-    renderBeat(data);
     hideLoader();
+    renderBeat(data);
   } catch(e){
     hideLoader();
-    // Recoverable: keep the current beat and let the player click a choice again.
     document.querySelectorAll('.ch').forEach(b=>b.disabled=false);
-    document.getElementById('chap-label').textContent = '⚠ ' + (e.message||'The storyteller stumbled') + ' — choose again';
+    document.getElementById('chap-label').textContent = '⚠ ' + (e.message || 'The storyteller stumbled') + ' — choose again';
   } finally { setBusy(false); }
 }
 
@@ -1726,26 +1788,36 @@ function setSceneArt(loc, narrative){
 
 let typewriterTimeout = null;
 let typewriterSkipped = false;
-function typewriteText(element, text, speed = 50) { // change speed if u need it 
+let typewriterActive = false; // true while a beat is being typewritten
+function typewriteText(element, text, speed = 50) {
   typewriterSkipped = false;
+  typewriterActive = true;
   element.textContent = '';
+  try { element.scrollTop = 0; } catch(_){} // start at top so the user reads from the start
   clearTimeout(typewriterTimeout);
   let i = 0;
   function type() {
     if (typewriterSkipped) {
       element.textContent = text;
+      typewriterActive = false;
+      typewriterTimeout = null;
       return;
     }
     if (i < text.length) {
       element.textContent += text.charAt(i++);
       typewriterTimeout = setTimeout(type, speed);
+    } else {
+      typewriterActive = false;
+      typewriterTimeout = null;
     }
   }
   type();
 }
 function skipTypewriter(element, text) {
   typewriterSkipped = true;
+  typewriterActive = false;
   clearTimeout(typewriterTimeout);
+  typewriterTimeout = null;
   element.textContent = text;
 }
 function updateDangerVignette(hp){
@@ -1765,15 +1837,29 @@ function updateDangerVignette(hp){
   }
 }
 
+// Click / tap / keypress ANYWHERE on the page skips the typewriter and shows the
+// full narrative immediately. Listener is installed exactly once per page load.
+let typewriterSkipInstalled = false;
 function setupTypewriterSkip() {
-  const storyEl = document.getElementById('story');
-  storyEl.addEventListener('click', () => {
-    if (!typewriterSkipped && typewriterTimeout) {
-      const scenEl = document.getElementById('scen-text');
-      skipTypewriter(scenEl, G.lastNarrative);
+  if (typewriterSkipInstalled) return;
+  typewriterSkipInstalled = true;
+  const trySkip = () => {
+    // Use typewriterActive (true ONLY while typing is in progress) — the previous
+    // check on typewriterTimeout left "skip" enabled for ever after the first beat.
+    if (typewriterActive) {
+      skipTypewriter(document.getElementById('scen-text'), G.lastNarrative);
     }
-  });
+  };
+  // Capture phase so we run BEFORE the clicked element's own handler, in the same
+  // gesture. The user's click still does whatever it normally would (pick a choice,
+  // open settings, etc.) — and the typewriter also skips.
+  document.addEventListener('click', trySkip, true);
+  document.addEventListener('touchstart', trySkip, {capture: true, passive: true});
+  document.addEventListener('keydown', trySkip, true);
 }
+// Install the listener at script load — don't wait until enterWoods(). This way a
+// click on the very first beat works too.
+setupTypewriterSkip();
 
 function renderBeat(data){
   const prevHp = G.hp;
@@ -1826,6 +1912,8 @@ function renderBeat(data){
   else if(data.hp > prevHp){ showHealFlash(); playHealSound(); }
 
   document.getElementById('chap-label').textContent = locationName(data.location);
+  // Typewriter speed: 25 ms/char (the original, "smooth and satisfying" pace).
+  // Click anywhere on the page to skip and show the full narrative immediately.
   typewriteText(document.getElementById('scen-text'), data.narrative || '', 25);
   narrate(data.narrative);
   const keys = ['A','B','C','D'];
