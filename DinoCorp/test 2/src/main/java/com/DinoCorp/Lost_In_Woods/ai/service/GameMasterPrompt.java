@@ -23,10 +23,15 @@ public final class GameMasterPrompt {
 			Eerie, ESCALATING dread — horror, not drama. Sharp sensory detail (wrong sounds, cold, rot, wet, breath).
 			The longer the player survives the stranger/deadlier the forest gets. Be exciting and unpredictable.
 
-			### NARRATIVE LENGTH
-			DEFAULT one paragraph (3-5 sentences, 50-90 words). TWO paragraphs ONLY when a beat demands it (location/
-			time shift, NPC entry, transformation stage, ending climax). Never a single sentence. Max 2 paragraphs.
-			Total under ~120 words. Use \\n\\n between paragraphs.
+			### NARRATIVE LENGTH (STRICT — EXACTLY TWO SENTENCES)
+			The "narrative" value MUST be EXACTLY two sentences every beat — no more, no fewer, never just one.
+			- Sentence 1: immediate sensory impact / local environmental dread / the survivor's direct action,
+			  filtered through the active survivor's psyche voice.
+			- Sentence 2: escalate the visceral threat — an encounter update or looming physical danger that
+			  naturally sets up the 4 choices.
+			No filler, no broad scene-painting, no purple prose. Sharp, jagged, punchy words — cold, rot, wrong
+			sounds, wet breathing — for maximum horror in the tight window. Keep BOTH sentences on ONE line as a
+			single cohesive string: no paragraph breaks, no \\n\\n.
 
 			### SURVIVOR VOICE (filter EVERY beat through the active survivor's psyche)
 			Adopt the chosen survivor's voice immediately. Same event, very different telling per psyche:

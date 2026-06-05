@@ -2144,6 +2144,28 @@ document.addEventListener('visibilitychange', ()=>{
 // Show the leaderboard on the splash as soon as the page loads.
 loadLeaderboard('splash-leaderboard');
 
+// ─── AUTO-SAVE RESUME ───
+// On load, ask the server if this browser has an in-progress run (identified by the
+// HttpOnly "litw_resume" cookie, sent automatically same-origin). If so, jump straight
+// into the game and re-render the last saved beat — so a refresh never loses progress.
+async function tryResumeSavedRun(){
+  try {
+    const res = await fetch(`${API}/game/resume`, { credentials:'same-origin' });
+    if(res.status !== 200) return;                 // 204 = nothing to resume → stay on splash
+    const data = await res.json();
+    if(!data || !data.active || !data.beat) return; // only auto-resume an in-progress run
+    G.sessionId = data.sessionId;
+    G.playerName = data.playerName;
+    // Skip splash + character creation, drop into the saved beat.
+    document.getElementById('splash').style.display='none';
+    const creator = document.getElementById('creator'); if(creator) creator.classList.remove('show');
+    document.getElementById('game').style.display='flex';
+    setupTypewriterSkip();
+    renderBeat(data.beat);
+  } catch(e){ /* offline or no save — leave the splash as-is */ }
+}
+tryResumeSavedRun();
+
 // Caution screen — dismissing it counts as the user gesture that unlocks audio autoplay.
 document.getElementById('caution').addEventListener('click', function dismissCaution(){
   this.removeEventListener('click', dismissCaution);

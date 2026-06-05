@@ -4,6 +4,7 @@ import com.DinoCorp.Lost_In_Woods.ai.dto.StoryChoiceRequest;
 import com.DinoCorp.Lost_In_Woods.ai.dto.StoryResponse;
 import com.DinoCorp.Lost_In_Woods.ai.dto.StoryStartRequest;
 import com.DinoCorp.Lost_In_Woods.ai.service.StoryService;
+import com.DinoCorp.Lost_In_Woods.service.GameService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,31 +13,41 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 // AI-driven story endpoints. The LLM (via StoryService) controls the narrative
 // and the choices; the game just relays the player's picks and tracks progress.
+// Every beat is auto-saved (GameService.saveBeat) right before it is returned, so a
+// browser refresh can resume from the last saved node via GET /api/game/resume.
 @RestController
 @RequestMapping("/api/story")
 @CrossOrigin(origins = "*")
 public class StoryController {
 
 	private final StoryService storyService;
+	private final GameService gameService;
 	private final ObjectMapper json = new ObjectMapper();
 
-	public StoryController(StoryService storyService) {
+	public StoryController(StoryService storyService, GameService gameService) {
 		this.storyService = storyService;
+		this.gameService = gameService;
 	}
 
 	// Begin the AI playthrough for a session, with the chosen character (Epic 1).
 	@PostMapping("/start")
 	public ResponseEntity<StoryResponse> start(@RequestBody StoryStartRequest request) {
-		return ResponseEntity.ok(storyService.start(request.sessionId(), describe(request), request.startingItems()));
+		StoryResponse resp = storyService.start(request.sessionId(), describe(request), request.startingItems());
+		gameService.saveBeat(request.sessionId(), resp);   // auto-save
+		return ResponseEntity.ok(resp);
 	}
 
 	// Submit the player's choice and get the next AI-generated beat.
 	@PostMapping("/choose")
 	public ResponseEntity<StoryResponse> choose(@RequestBody StoryChoiceRequest request) {
-		return ResponseEntity.ok(storyService.choose(request.sessionId(), request.choice()));
+		StoryResponse resp = storyService.choose(request.sessionId(), request.choice());
+		gameService.saveBeat(request.sessionId(), resp);   // auto-save
+		return ResponseEntity.ok(resp);
 	}
 
 	// Streaming variants. Same inputs as /start and /choose, but the response is a
@@ -49,6 +60,7 @@ public class StoryController {
 	@PostMapping(value = "/start/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public ResponseEntity<StreamingResponseBody> startStream(@RequestBody StoryStartRequest request) {
 		return ResponseEntity.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(out -> stream(out,
+				request.sessionId(),
 				sink -> storyService.startStream(request.sessionId(), describe(request),
 						request.startingItems(), sink)));
 	}
@@ -56,18 +68,21 @@ public class StoryController {
 	@PostMapping(value = "/choose/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public ResponseEntity<StreamingResponseBody> chooseStream(@RequestBody StoryChoiceRequest request) {
 		return ResponseEntity.ok().contentType(MediaType.TEXT_EVENT_STREAM).body(out -> stream(out,
+				request.sessionId(),
 				sink -> storyService.chooseStream(request.sessionId(), request.choice(), sink)));
 	}
 
 	// Run the generation, writing delta frames as they arrive and a final "done"
-	// frame with the full StoryResponse. Errors become "error" frames so the
-	// client can show a clear message instead of a half-stream.
-	private void stream(OutputStream out, java.util.function.Function<java.util.function.Consumer<String>, StoryResponse> run) {
+	// frame with the full StoryResponse. The beat is auto-saved before the "done"
+	// frame so a reload mid-stream can still resume the last completed beat. Errors
+	// become "error" frames so the client can show a clear message.
+	private void stream(OutputStream out, Long sessionId, Function<Consumer<String>, StoryResponse> run) {
 		try {
 			StoryResponse resp = run.apply(text -> {
 				try { writeFrame(out, "delta", json.writeValueAsString(text)); }
 				catch (Exception ignored) { /* client gone — let main path detect */ }
 			});
+			gameService.saveBeat(sessionId, resp);   // auto-save
 			writeFrame(out, "done", json.writeValueAsString(resp));
 		} catch (Exception e) {
 			try { writeFrame(out, "error", json.writeValueAsString(String.valueOf(e.getMessage()))); }
