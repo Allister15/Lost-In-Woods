@@ -11,5 +11,7 @@ public record ResumeResponse(
         String playerName,
         boolean isGuest,
         boolean active,
+        String survivorId,
+        String survivorName,
         StoryResponse beat
 ) {}

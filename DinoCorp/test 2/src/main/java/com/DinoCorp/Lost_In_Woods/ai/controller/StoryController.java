@@ -38,6 +38,7 @@ public class StoryController {
 	@PostMapping("/start")
 	public ResponseEntity<StoryResponse> start(@RequestBody StoryStartRequest request) {
 		StoryResponse resp = storyService.start(request.sessionId(), describe(request), request.startingItems());
+		gameService.saveSurvivor(request.sessionId(), request.survivorId(), request.survivorName());  // persist chosen character
 		gameService.saveBeat(request.sessionId(), resp);   // auto-save
 		return ResponseEntity.ok(resp);
 	}
