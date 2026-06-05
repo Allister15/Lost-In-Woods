@@ -2,9 +2,13 @@ package com.DinoCorp.Lost_In_Woods.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.ArrayList;
-import java.util.List;
 
+import java.time.Instant;
+import java.util.UUID;
+
+// A single endless playthrough. The AI generates the story and reports the
+// player's health, score, traits, and inventory each beat; this record holds the
+// latest values plus the final score, for the leaderboard.
 @Entity
 @Table(name = "game_sessions")
 @Getter
@@ -17,43 +21,71 @@ public class GameSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Name entered on the splash ("Guest" for guests).
+    private String playerName;
+
+    // Latest health/score reported by the AI for this run.
     @Builder.Default
-    private int currentHealth = 80;
+    private int currentHealth = 100;
     @Builder.Default
     private int currentScore = 0;
+
+    // How many events (beats) the player has survived this run.
     @Builder.Default
-    private int currentSceneIndex = 0;
+    private int eventsSurvived = 0;
+
+    // True once the run ends (death at 0 HP).
     @Builder.Default
-    private boolean isGameOver = false;
+    private boolean gameOver = false;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "session_traits", joinColumns = @JoinColumn(name = "session_id"))
-    @Column(name = "trait")
+    // The death title reached (null until the run ends).
+    private String ending;
+
+    // finalScore = currentScore + currentHealth + traitPoints, computed at death.
     @Builder.Default
-    private List<String> discoveredTraits = new ArrayList<>();
+    private int finalScore = 0;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "session_history", joinColumns = @JoinColumn(name = "session_id"))
-    @Column(name = "story_beat", columnDefinition = "TEXT")
+    // ─── AUTO-SAVE / RESUME (persistent session) ──────────────────────────────
+    // Opaque, hard-to-guess resume handle. Delivered to the browser as the
+    // HttpOnly "litw_resume" cookie; GET /api/game/resume looks the session up by
+    // this (never by the sequential id, which would be enumerable).
+    @Column(name = "resume_token", unique = true)
+    private UUID resumeToken;
+
+    // True for "Play as Guest" runs (player_name == "Guest"). Wrapper type (not
+    // primitive) so legacy rows created before this column existed load their NULL as
+    // null instead of throwing "Null value assigned to a property of primitive type".
     @Builder.Default
-    private List<String> narrativeHistory = new ArrayList<>();
+    @Column(name = "is_guest")
+    private Boolean guest = false;
 
-    public void applyOutcome(Choice choice) {
-        this.currentHealth = Math.max(0, Math.min(100, this.currentHealth + choice.getHpModifier()));
-        this.currentScore += choice.getScoreModifier();
+    // Persistent anonymous identity for a guest browser (the "litw_guest" cookie),
+    // so a returning guest's runs/scores group together. Null for named users.
+    @Column(name = "guest_token")
+    private UUID guestToken;
 
-        if (choice.getConferredTrait() != null && !choice.getConferredTrait().isBlank()) {
-            if (!this.discoveredTraits.contains(choice.getConferredTrait())) {
-                this.discoveredTraits.add(choice.getConferredTrait());
-            }
-        }
+    // Soft progress grouping for the endless live engine (every 4 beats = a
+    // "chapter"); the hybrid prefilled engine sets these precisely. Wrapper types so
+    // legacy rows with NULL in these added columns load cleanly.
+    @Builder.Default
+    @Column(name = "current_chapter")
+    private Integer currentChapter = 1;
+    @Builder.Default
+    @Column(name = "current_turn_in_chapter")
+    private Integer currentTurnInChapter = 1;
 
-        String cleanChapter = "Chapter " + (this.currentSceneIndex + 1);
-        String beatLog = String.format("%s|%b|%s", cleanChapter, choice.isGoodOutcome(), choice.getNarrative());
-        this.narrativeHistory.add(beatLog);
+    // Serialized snapshots of the last beat, for resume rendering + queryability.
+    @Column(name = "items_json", length = 1000)
+    private String itemsJson;
+    @Column(name = "traits_json", length = 1000)
+    private String traitsJson;
 
-        if (this.currentHealth <= 0) {
-            this.isGameOver = true;
-        }
-    }
+    // The verbatim last engine beat (full StoryResponse JSON). Resume deserializes
+    // this straight back so the reloaded page renders identically.
+    @Column(name = "last_beat_json", length = 8000)
+    private String lastBeatJson;
+
+    // Last autosave time — drives guest expiry / pruning of stale runs.
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }
