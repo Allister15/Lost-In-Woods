@@ -88,4 +88,11 @@ public class GameSession {
     // Last autosave time — drives guest expiry / pruning of stale runs.
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    // The chosen survivor's preset id + display name, persisted so a resumed run reloads
+    // the correct character portrait/name alongside the rest of the saved session.
+    @Column(name = "survivor_id", length = 32)
+    private String survivorId;
+    @Column(name = "survivor_name", length = 64)
+    private String survivorName;
 }

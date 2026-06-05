@@ -12,5 +12,7 @@ public record StoryStartRequest(
         String skinColor,
         String clothingColor,
         String character,
-        List<String> startingItems
+        List<String> startingItems,
+        String survivorId,
+        String survivorName
 ) {}

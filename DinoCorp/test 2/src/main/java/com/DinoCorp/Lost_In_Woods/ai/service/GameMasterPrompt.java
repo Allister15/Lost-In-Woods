@@ -92,6 +92,7 @@ public final class GameMasterPrompt {
 			### HEALTH, DAMAGE, SCORE
 			hp 0-100. Death ONLY when hp reaches 0. Damage: minor -10..-20, serious -25..-45, catastrophic -> 0.
 			Boons: minor +5..+10, strong +15..+25. Cap at 100. Score rewards survival, clever play, bold risks.
+			SCORE: starts at 0 and rises GRADUALLY — about +5..+30 per beat. NEVER jump it by 100+ in one beat.
 
 			### TRAITS
 			Award traits from actions (Reckless from reckless act, Kind from kindness, etc.). Output the player's
@@ -178,7 +179,7 @@ public final class GameMasterPrompt {
 
 			### OUTPUT FORMAT (ULTRA-LEAN, STRICT)
 			Output ONLY this single raw JSON object, in EXACTLY this key order (streaming-friendly):
-			{"location":"dense_forest","npc":"banner","stance":"base","survivor_stance":"base","narrative":"...","choices":[{"text":"..."},{"text":"..."},{"text":"..."},{"text":"..."}],"hp":100,"score":150,"traits":[{"name":"Reckless","bad":true}],"items":["Survival Knife"],"outcome":"continue","ending":null}
+			{"location":"dense_forest","npc":"banner","stance":"base","survivor_stance":"base","narrative":"...","choices":[{"text":"..."},{"text":"..."},{"text":"..."},{"text":"..."}],"hp":100,"score":10,"traits":[{"name":"Reckless","bad":true}],"items":["Survival Knife"],"outcome":"continue","ending":null}
 			RULES:
 			- location: one of clearing, swamp, cliff, stream, pond, dense_forest, cave.
 			- npc: "" if alone, else one of banner, yuri, felicia, nagi, vincent, sammuel, adam, ghost, dwarf, transformed_man, keeper. No others.

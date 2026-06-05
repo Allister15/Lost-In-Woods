@@ -5,14 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4a129c33-986a-49d8-82ae-8aac58efe698" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/controller/StoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/controller/StoryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/dto/StoryStartRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/dto/StoryStartRequest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/GameMasterPrompt.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/GameMasterPrompt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/GameController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/StoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/StoryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/dto/ResumeResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/dto/ResumeResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/model/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/model/GameSession.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/repository/GameSessionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/repository/GameSessionRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" afterDir="false" />
     </list>
@@ -43,14 +42,14 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/vinceonte/dino-corp.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/Allister15/Lost-In-Woods&quot;,
     &quot;accountId&quot;: &quot;ee783be7-7609-451a-809c-344b888c6dca&quot;
   }
 }</component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -74,31 +73,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JUnit.GameSaveServiceTest.executor": "Run",
-    "JUnit.HybridEngineLogicTest.executor": "Run",
-    "JavaScript Debug.lost_in_woods.html.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Spring Boot.LostInWoodsApplication.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "final",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Chris Nelson/dino-corp/DinoCorp/test 2/Assets/Antagonist/Mid_Demon_Form",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JUnit.GameSaveServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.HybridEngineLogicTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.Lost_In_Woods in Lost_In_Woods.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.lost_in_woods.html.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.LostInWoodsApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;final&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Chris Nelson/dino-corp/DinoCorp/test 2/Assets/Antagonist/Mid_Demon_Form&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Chris Nelson\dino-corp\DinoCorp\test 2\Assets\Antagonist\Mid_Demon_Form" />
@@ -111,7 +111,7 @@
       <recent name="C:\Users\Chris Nelson\dino-corp\DinoCorp\test 2\Assets" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.GameSaveServiceTest">
+  <component name="RunManager" selected="JUnit.Lost_In_Woods in Lost_In_Woods">
     <configuration name="GameSaveServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="Lost_In_Woods" />
       <extension name="coverage">
@@ -142,6 +142,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Lost_In_Woods in Lost_In_Woods" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Lost_In_Woods" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/DinoCorp/test 2/src/test/java/com/DinoCorp/Lost_In_Woods" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="lost_in_woods.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/dino-corp/Lost_In_Woods/static/lost_in_woods.html" useBuiltInWebServerPort="true">
       <method v="2" />
     </configuration>
@@ -163,6 +171,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.Lost_In_Woods in Lost_In_Woods" />
         <item itemvalue="JUnit.GameSaveServiceTest" />
         <item itemvalue="JUnit.HybridEngineLogicTest" />
         <item itemvalue="JavaScript Debug.lost_in_woods.html" />
@@ -195,7 +204,9 @@
       <workItem from="1780563101345" duration="557000" />
       <workItem from="1780563690898" duration="26847000" />
       <workItem from="1780624388824" duration="1658000" />
-      <workItem from="1780627745768" duration="6901000" />
+      <workItem from="1780627745768" duration="8888000" />
+      <workItem from="1780659185819" duration="2704000" />
+      <workItem from="1780665392781" duration="2287000" />
     </task>
     <servers />
   </component>

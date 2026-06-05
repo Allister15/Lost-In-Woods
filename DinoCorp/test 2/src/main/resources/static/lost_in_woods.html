@@ -55,6 +55,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 .splash-auth{display:flex;flex-direction:column;gap:10px;width:300px;margin:0 auto 16px;animation:fadeInDown 1s ease 1.1s both;}
 #mode-choice,#login-form{display:flex;flex-direction:column;gap:10px;}
 #login-form{display:none;}
+/* Resume button: same footprint as the other menu buttons and inside the #mode-choice
+   flex column, so the 10px gap keeps it from overlapping; a soft glow marks it as the
+   "continue your run" action. It only appears when a saved run exists. */
+.splash-resume{border-color:var(--green);box-shadow:0 0 12px rgba(98,255,166,0.28);}
 .auth-input{width:100%;padding:11px 14px;background:rgba(5,15,5,0.85);border:1px solid var(--green-dim);color:#fff;border-radius:4px;font-family:var(--font-b);font-size:calc(1rem * var(--text-scale));transition:border-color 0.2s;}
 .auth-input:focus{outline:none;border-color:var(--green);}
 .splash-play{font-family:var(--font-t);font-size:13px;letter-spacing:5px;background:transparent;border:1px solid var(--green);color:var(--green);padding:15px 40px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all 0.3s;position:relative;overflow:hidden;}
@@ -359,8 +363,10 @@ body.mobile-mode .scene-holder{box-shadow:inset 0 0 22px rgba(0,0,0,0.7),0 2px 8
 body.mobile-mode .splash-auth{width:88%;max-width:380px;}
 body.mobile-mode .splash-play{padding:14px 20px;font-size:13px;letter-spacing:3px;min-height:48px;}
 body.mobile-mode .leaderboard{max-width:90%;}
-body.mobile-mode .lb-grid{grid-template-columns:1fr;}
-body.mobile-mode .lb-row{font-size:11px;}
+body.mobile-mode .lb-grid{grid-template-columns:1fr 1fr;column-gap:10px;}      /* side by side — up to 10 (2 cols x 5) */
+body.mobile-mode .lb-row{font-size:10px;padding:3px 5px;gap:6px;}             /* shrunk so all 10 fit */
+body.mobile-mode .lb-rank{font-size:9px;width:14px;}
+body.mobile-mode .lb-score{font-size:10px;}
 
 /* ── PORTRAIT MOBILE ─────────────────────────────────────────────────── */
 body.mobile-portrait .splash-headline{flex-direction:column;gap:4px;}
@@ -512,6 +518,7 @@ body.mobile-landscape #kb{display:none;}
     <div class="splash-subtitle">A Psychological Survival Horror — narrated by AI</div>
     <div class="splash-auth">
       <div id="mode-choice">
+        <button id="resume-btn" class="splash-play splash-resume" style="display:none" onclick="playClickSound(); resumeSavedRun()" onmouseenter="playHoverBeep(event)">⮌ &nbsp; Resume Run</button>
         <button class="splash-play" onclick="playClickSound(); playAsGuest()" onmouseenter="playHoverBeep(event)">▶ &nbsp; Play as Guest</button>
         <button class="splash-play splash-alt" onclick="playClickSound(); showLogin()" onmouseenter="playHoverBeep(event)">Login with a name</button>
       </div>
@@ -707,8 +714,8 @@ body.mobile-landscape #kb{display:none;}
 
 <div id="confirm">
   <div id="confirm-box">
-    <div id="confirm-title">Abandon this run?</div>
-    <div id="confirm-text">Returning to the main menu ends your current playthrough — this story's progress will be lost.</div>
+    <div id="confirm-title">Return to main menu?</div>
+    <div id="confirm-text">Your progress is saved automatically — your run stays right where you left it. You can jump back in any time with the <b>Resume</b> button on the main menu.</div>
     <div id="confirm-actions">
       <button class="splash-play" onclick="playClickSound(); cancelReturn()" onmouseenter="playHoverBeep(event)">Keep Playing</button>
       <button class="splash-play splash-alt" onclick="playClickSound(); confirmReturn()" onmouseenter="playHoverBeep(event)">Return to Menu</button>
@@ -1435,6 +1442,15 @@ function enterWoods(){
   document.getElementById('game').style.display='flex';
   // Auto-start ambient music (this click satisfies the browser autoplay gate).
   if(!audioOn){ audioOn=true; startAmbient(); document.getElementById('btn-music').classList.remove('off'); }
+  // Persist the chosen survivor + identity so an auto-save resume (page refresh) can
+  // restore the portrait/name/appearance, not just the beat. Per-browser; overwritten
+  // each new run.
+  try {
+    localStorage.setItem('litw_run', JSON.stringify({
+      survivorId: G.survivorId, survivorName: G.survivorName, appearance: G.appearance,
+      startItems: G.startItems, startName: G.startName, startEndpoint: G.startEndpoint
+    }));
+  } catch(e){}
   setupTypewriterSkip();
   beginStory();
 }
@@ -1503,7 +1519,7 @@ async function beginStory(){
   // stream (e.g. owl-alpha). The streaming endpoints still exist server-side; flip
   // back if/when a stream-capable model is selected.
   try {
-    const body = Object.assign({sessionId: G.sessionId}, G.appearance||{}, {startingItems: G.startItems||[]});
+    const body = Object.assign({sessionId: G.sessionId}, G.appearance||{}, {startingItems: G.startItems||[], survivorId: G.survivorId, survivorName: G.survivorName});
     const res = await fetch(`${API}/story/start`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(body)
@@ -1905,8 +1921,8 @@ function renderBeat(data){
     G.traits.unshift({name: 'AM', bad: true});
     if(G.traits.length > 6) G.traits = G.traits.slice(0, 6);
   }
-  // Easter egg: score 387+ plays hate.mp3 once
-  if(data.score >= 387 && !G.hateAudioTriggered) {
+  // Easter egg: the player named "AM" hears hate.mp3 once their score reaches 387 — once per run.
+  if(data.score >= 387 && G.startName && G.startName.toUpperCase() === 'AM' && !G.hateAudioTriggered) {
     G.hateAudioTriggered = true;
     hateAudio = new Audio('music/hate.mp3');
     hateAudio.volume = Math.min(1, masterVolume * musicVolume);
@@ -2090,10 +2106,12 @@ function goToMenu(){
   hideLogin();
   document.getElementById('auth-msg').textContent='';
   startHomeTheme();
-  // Drop the abandoned run's state completely (no identity carry).
+  // Reset the IN-MEMORY run state, but DO NOT delete the saved session — the server
+  // session + resume cookie stay alive so the player can resume from the menu.
   stopGodIsComing();
   G = freshGameState();
   loadLeaderboard('splash-leaderboard');
+  checkResume();   // re-reveal the Resume button if the run is still resumable
 }
 
 // ─── LEADERBOARD ───
@@ -2144,27 +2162,48 @@ document.addEventListener('visibilitychange', ()=>{
 // Show the leaderboard on the splash as soon as the page loads.
 loadLeaderboard('splash-leaderboard');
 
-// ─── AUTO-SAVE RESUME ───
-// On load, ask the server if this browser has an in-progress run (identified by the
-// HttpOnly "litw_resume" cookie, sent automatically same-origin). If so, jump straight
-// into the game and re-render the last saved beat — so a refresh never loses progress.
-async function tryResumeSavedRun(){
+// ─── AUTO-SAVE RESUME (Resume button on the main menu) ───
+// When the menu loads (and whenever we return to it), ask the server whether this browser
+// has an in-progress run — identified by the HttpOnly "litw_resume" cookie, sent
+// automatically same-origin. If so, cache it and reveal the Resume button; clicking it
+// drops back into the exact saved beat with the correct survivor.
+let pendingResume = null;
+async function checkResume(){
+  pendingResume = null;
   try {
     const res = await fetch(`${API}/game/resume`, { credentials:'same-origin' });
-    if(res.status !== 200) return;                 // 204 = nothing to resume → stay on splash
-    const data = await res.json();
-    if(!data || !data.active || !data.beat) return; // only auto-resume an in-progress run
-    G.sessionId = data.sessionId;
-    G.playerName = data.playerName;
-    // Skip splash + character creation, drop into the saved beat.
-    document.getElementById('splash').style.display='none';
-    const creator = document.getElementById('creator'); if(creator) creator.classList.remove('show');
-    document.getElementById('game').style.display='flex';
-    setupTypewriterSkip();
-    renderBeat(data.beat);
-  } catch(e){ /* offline or no save — leave the splash as-is */ }
+    if(res.status === 200){
+      const data = await res.json();
+      if(data && data.active && data.beat) pendingResume = data;   // 204 = nothing to resume
+    }
+  } catch(e){ /* offline — no resume available */ }
+  updateResumeButton();
 }
-tryResumeSavedRun();
+function updateResumeButton(){
+  const btn = document.getElementById('resume-btn');
+  if(btn) btn.style.display = pendingResume ? '' : 'none';
+}
+function resumeSavedRun(){
+  if(!pendingResume) return;
+  const data = pendingResume;
+  G.sessionId = data.sessionId;
+  G.playerName = data.playerName;
+  // The survivor reloads WITH the session (persisted server-side at story start). Fall
+  // back to the localStorage snapshot, then to the preset, so the character is never lost.
+  let sv = null;
+  try { sv = JSON.parse(localStorage.getItem('litw_run') || 'null'); } catch(e){}
+  G.survivorId   = data.survivorId   || (sv && sv.survivorId)   || null;
+  G.survivorName = data.survivorName || (sv && sv.survivorName) || '';
+  if(sv){ G.appearance = sv.appearance; G.startItems = sv.startItems || []; G.startName = sv.startName ?? null; if(sv.startEndpoint) G.startEndpoint = sv.startEndpoint; }
+  if(!G.survivorName && G.survivorId){ const p = PRESETS.find(x=>x.id===G.survivorId); if(p) G.survivorName = p.name; }
+  // Drop into the saved beat, skipping splash + character creation.
+  document.getElementById('splash').style.display='none';
+  const creator = document.getElementById('creator'); if(creator) creator.classList.remove('show');
+  document.getElementById('game').style.display='flex';
+  setupTypewriterSkip();
+  renderBeat(data.beat);
+}
+checkResume();
 
 // Caution screen — dismissing it counts as the user gesture that unlocks audio autoplay.
 document.getElementById('caution').addEventListener('click', function dismissCaution(){

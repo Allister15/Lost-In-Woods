@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 // Drives the endless AI-controlled story. Holds each run's transcript in memory,
@@ -28,6 +29,10 @@ public class StoryService {
 	private static final int GOOD_TRAIT_POINTS = 5;
 	private static final int BAD_TRAIT_SURVIVED = 1;
 	private static final int BAD_TRAIT_FATAL = -3;
+
+	// Max the cumulative score may rise in a single beat. Stops an over-eager model from
+	// spiking the score to 100+ on the first choice; the score still grows every beat.
+	private static final int MAX_SCORE_GAIN_PER_BEAT = 40;
 
 	// Cap how much transcript we resend each turn (system prompt + most recent
 	// messages) so input tokens — and latency — don't grow as the run goes on.
@@ -50,6 +55,20 @@ public class StoryService {
 			new ChoiceView("Stop and listen to the dark", ""),
 			new ChoiceView("Search your surroundings", ""),
 			new ChoiceView("Move quickly and quietly", ""));
+
+	// 10 atmospheric two-sentence fallbacks, chosen at random whenever the model returns
+	// a beat with an empty "narrative" so the scene box is never left blank.
+	private static final List<String> NARRATIVE_FALLBACKS = List.of(
+			"The dark woods hold their breath around you, every shadow leaning a little too close. Something just beyond the treeline shifts its weight, waiting for you to move first.",
+			"A wet, rotten cold seeps up through your boots and into your spine. Somewhere in the black brush ahead, a slow breath rattles that is not your own.",
+			"The silence presses against your ears until it hums, thick and wrong. Branches creak overhead as if the forest itself is bending closer to watch.",
+			"Mist coils low across the ground, swallowing your feet and muffling every step. A shape that should not be there stands motionless between the trunks ahead.",
+			"Your pulse pounds loud in the stillness, betraying you to whatever listens. The trees lean inward, narrowing the dark path to a single choking throat.",
+			"Frost-bitten air claws at your throat with every shallow breath. A twig snaps somewhere behind you, and the night holds perfectly, terribly still.",
+			"The smell of damp rot and old blood thickens until you can taste it. Something heavy drags itself through the undergrowth, drawing slowly nearer.",
+			"Moonlight dies among the crowded pines, leaving you blind in a churning dark. A low, wet sound rises from the black ahead, patient and hungry and close.",
+			"The cold here has a weight to it, pressing on your chest like a hand. Just out of sight, branches part and settle, marking the passage of something unseen.",
+			"Every instinct screams at you to run, but the dark gives you nowhere to go. Ahead, the shadows gather into a shape that watches you without eyes.");
 
 	public StoryService(AIProvider aiProvider, GameSessionRepository sessionRepository) {
 		this.aiProvider = aiProvider;
@@ -186,6 +205,16 @@ public class StoryService {
 					prev != null ? prev.items() : List.of(),
 					"continue", null);
 		} else {
+			// Some models occasionally return a valid beat with an EMPTY narrative — drop
+			// in a random atmospheric fallback so the scene box is never left blank.
+			if (!nonBlank(beat.narrative())) {
+				beat = withNarrative(beat, randomFallbackNarrative());
+			}
+			// ...and sometimes fewer (or more) than 4 choices on a live beat — normalize to
+			// EXACTLY 4 so the UI never shows a single dangling choice.
+			if ("continue".equalsIgnoreCase(beat.outcome()) && beat.choices().size() != 4) {
+				beat = withChoices(beat, ensureFourChoices(beat.choices()));
+			}
 			lastBeat.put(sessionId, beat);
 		}
 
@@ -196,7 +225,10 @@ public class StoryService {
 			// The opening beat keeps the full starting health (100) and score (0).
 			int hp = Math.max(0, Math.min(100, beat.hp()));
 			session.setCurrentHealth(hp);
-			session.setCurrentScore(beat.score());
+			// Score grows smoothly: never below the previous total, and capped per beat so an
+			// over-eager model can't spike it to 100+ on the very first choices.
+			int prevScore = session.getCurrentScore();
+			session.setCurrentScore(Math.max(prevScore, Math.min(beat.score(), prevScore + MAX_SCORE_GAIN_PER_BEAT)));
 
 			boolean died = hp <= 0;                                  // death is hp-authoritative
 			boolean reachedEnding = !died && isSurvivalEnding(beat.outcome());
@@ -209,12 +241,12 @@ public class StoryService {
 					session.setCurrentHealth(0);
 					session.setEnding(nonBlank(beat.ending()) ? beat.ending() : "You Died");
 					// Fatal run: bad traits are penalized.
-					session.setFinalScore(beat.score() + traitPoints(beat.traits(), true));
+					session.setFinalScore(session.getCurrentScore() + traitPoints(beat.traits(), true));
 					endingType = "death";
 				} else {
 					// Survived ending (escape/transformation/lost/secret): bad traits add +1.
 					session.setEnding(nonBlank(beat.ending()) ? beat.ending() : endingTitle(beat.outcome()));
-					session.setFinalScore(beat.score() + session.getCurrentHealth() + traitPoints(beat.traits(), false));
+					session.setFinalScore(session.getCurrentScore() + session.getCurrentHealth() + traitPoints(beat.traits(), false));
 					endingType = beat.outcome().toLowerCase();
 				}
 			}
@@ -341,6 +373,38 @@ public class StoryService {
 
 	private boolean nonBlank(String s) {
 		return s != null && !s.isBlank();
+	}
+
+	// Pick one of the 10 NARRATIVE_FALLBACKS at random (used when the model returns an
+	// empty narrative).
+	private String randomFallbackNarrative() {
+		return NARRATIVE_FALLBACKS.get(ThreadLocalRandom.current().nextInt(NARRATIVE_FALLBACKS.size()));
+	}
+
+	// Beat is an immutable record — copy it with a replacement narrative, everything else
+	// (choices, hp, score, traits, items, outcome, ...) preserved.
+	private Beat withNarrative(Beat b, String narrative) {
+		return new Beat(b.location(), b.npc(), b.stance(), b.survivorStance(), narrative, b.choices(),
+				b.hp(), b.score(), b.traits(), b.items(), b.outcome(), b.ending());
+	}
+
+	// Force a live beat to EXACTLY 4 choices: trim extras, pad shortfalls with generic
+	// fallback actions (skipping duplicates). Fixes models that emit only 1-3 choices.
+	private List<ChoiceView> ensureFourChoices(List<ChoiceView> choices) {
+		List<ChoiceView> out = new ArrayList<>(choices == null ? List.of() : choices);
+		while (out.size() > 4) out.remove(out.size() - 1);
+		for (ChoiceView fb : FALLBACK_CHOICES) {
+			if (out.size() >= 4) break;
+			boolean dup = out.stream().anyMatch(c -> c.text() != null && c.text().equalsIgnoreCase(fb.text()));
+			if (!dup) out.add(fb);
+		}
+		while (out.size() < 4) out.add(new ChoiceView("Wait and watch the dark", ""));
+		return out;
+	}
+
+	private Beat withChoices(Beat b, List<ChoiceView> choices) {
+		return new Beat(b.location(), b.npc(), b.stance(), b.survivorStance(), b.narrative(), choices,
+				b.hp(), b.score(), b.traits(), b.items(), b.outcome(), b.ending());
 	}
 
 	private GameSession requireSession(Long sessionId) {

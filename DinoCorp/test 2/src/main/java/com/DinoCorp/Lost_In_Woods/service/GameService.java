@@ -70,6 +70,17 @@ public class GameService {
         sessionRepository.save(s);
     }
 
+    // Persist the chosen survivor once, at story start, so a resumed run reloads the
+    // correct character (portrait/name) as part of the saved session data.
+    public void saveSurvivor(Long sessionId, String survivorId, String survivorName) {
+        if (sessionId == null || survivorId == null || survivorId.isBlank()) return;
+        GameSession s = sessionRepository.findById(sessionId).orElse(null);
+        if (s == null) return;
+        s.setSurvivorId(survivorId);
+        s.setSurvivorName(survivorName);
+        sessionRepository.save(s);
+    }
+
     // ─── Resume: restore the last saved beat for a cookie token ────────────────
 
     public Optional<ResumeResponse> resume(UUID resumeToken) {
@@ -81,7 +92,8 @@ public class GameService {
             try {
                 StoryResponse beat = json.readValue(s.getLastBeatJson(), StoryResponse.class);
                 return Optional.of(new ResumeResponse(
-                        s.getId(), s.getPlayerName(), Boolean.TRUE.equals(s.getGuest()), !s.isGameOver(), beat));
+                        s.getId(), s.getPlayerName(), Boolean.TRUE.equals(s.getGuest()), !s.isGameOver(),
+                        s.getSurvivorId(), s.getSurvivorName(), beat));
             } catch (Exception e) {
                 return Optional.empty();   // corrupt snapshot — treat as no resume
             }
