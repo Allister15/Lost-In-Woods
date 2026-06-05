@@ -570,6 +570,7 @@ body.mobile-landscape #kb{display:none;}
       <button class="ctrl-btn off" id="btn-music" onclick="playClickSound(); toggleMusic()" onmouseenter="playHoverBeep(event)" title="Toggle music">♪</button>
       <button class="ctrl-btn off" id="btn-narr" onclick="playClickSound(); toggleNarration()" onmouseenter="playHoverBeep(event)" title="Toggle narration">🗣</button>
       <button class="ctrl-btn" id="btn-settings" onclick="playClickSound(); openAudioMenu()" onmouseenter="playHoverBeep(event)" title="Audio settings">⚙️</button>
+      <button class="ctrl-btn" id="btn-ach" onclick="playClickSound(); openAchievements()" onmouseenter="playHoverBeep(event)" title="Achievements">🏆</button>
       <div class="hud-item"><div class="hud-label">Survived</div><div class="hud-val" id="h-events">0</div></div>
       <div class="hud-item"><div class="hud-label">Score</div><div class="hud-val" id="h-score">0</div></div>
       <div class="hud-item">
@@ -722,6 +723,51 @@ body.mobile-landscape #kb{display:none;}
     </div>
   </div>
 </div>
+
+<!-- ═══ ACHIEVEMENTS ═══ -->
+<style>
+/* Modal */
+#ach-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(3px);}
+#ach-modal.show{display:flex;animation:achFade 0.25s ease;}
+@keyframes achFade{from{opacity:0}to{opacity:1}}
+.ach-box{width:min(680px,92vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#0c1410,#070b08);border:1px solid var(--green-dim);border-radius:10px;box-shadow:0 0 40px rgba(98,255,166,0.12);overflow:hidden;}
+.ach-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid rgba(98,255,166,0.15);}
+.ach-head h2{font-family:var(--font-t);color:var(--green);letter-spacing:3px;font-size:16px;margin:0;text-transform:uppercase;}
+.ach-head .ach-count{color:var(--muted);font-size:12px;font-family:var(--font-t);}
+.ach-head .ach-close{margin-left:auto;background:none;border:1px solid var(--green-dim);color:var(--green);border-radius:4px;cursor:pointer;font-size:13px;padding:5px 12px;}
+.ach-head .ach-close:hover{border-color:var(--green);}
+#ach-body{padding:14px 20px;overflow-y:auto;}
+.ach-section{margin-bottom:16px;}
+.ach-sec-title{font-family:var(--font-t);color:var(--green);letter-spacing:2px;font-size:11px;text-transform:uppercase;border-bottom:1px solid rgba(98,255,166,0.12);padding-bottom:4px;margin-bottom:8px;opacity:0.85;}
+.ach-card{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:6px;margin-bottom:6px;border:1px solid transparent;}
+.ach-card .ach-icon{font-size:20px;width:26px;text-align:center;flex-shrink:0;}
+.ach-name{font-family:var(--font-t);font-size:13px;letter-spacing:1px;}
+.ach-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35;}
+.ach-card.locked{opacity:0.42;filter:grayscale(1);}                  /* locked = dimmed/greyscale */
+.ach-card.unlocked{background:rgba(212,175,55,0.06);border-color:rgba(212,175,55,0.3);}
+.ach-card.unlocked .ach-name{color:#f1c75e;text-shadow:0 0 8px rgba(241,199,94,0.35);} /* unlocked = golden */
+.ach-loading{color:var(--muted);text-align:center;padding:24px;}
+/* Toasts — upper-right, slide in from the right, hold, then slide+fade out */
+#ach-toasts{position:fixed;top:16px;right:16px;z-index:240;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+.ach-toast{display:flex;align-items:center;gap:12px;min-width:260px;max-width:340px;padding:12px 14px;border-radius:8px;background:linear-gradient(135deg,#15110a,#0b0d09);border:1px solid rgba(212,175,55,0.45);box-shadow:0 6px 24px rgba(0,0,0,0.5),0 0 18px rgba(212,175,55,0.18);transform:translateX(120%);opacity:0;transition:transform 0.5s cubic-bezier(.2,.8,.2,1),opacity 0.5s ease;}
+.ach-toast.in{transform:translateX(0);opacity:1;}
+.ach-toast.out{transform:translateX(120%);opacity:0;}
+.ach-toast-trophy{font-size:24px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(241,199,94,0.6));}
+.ach-toast-title{font-family:var(--font-t);color:#f1c75e;font-size:12px;letter-spacing:0.5px;}
+.ach-toast-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3;}
+body.mobile-mode .ach-toast{min-width:0;max-width:74vw;}
+</style>
+<div id="ach-modal">
+  <div class="ach-box">
+    <div class="ach-head">
+      <h2>🏆 Achievements</h2>
+      <span class="ach-count" id="ach-count"></span>
+      <button class="ach-close" onclick="playClickSound(); closeAchievements()">Close</button>
+    </div>
+    <div id="ach-body"></div>
+  </div>
+</div>
+<div id="ach-toasts"></div>
 
 </div><!-- /stage -->
 <script>
@@ -1909,6 +1955,8 @@ setupTypewriterSkip();
 function renderBeat(data){
   const prevHp = G.hp;
   G.score=data.score; G.hp=data.hp; G.traits=data.traits||[]; G.items=data.items||[];
+  // Fire a toast for any achievement unlocked on this beat (backend-evaluated).
+  if(data.newAchievements && data.newAchievements.length) data.newAchievements.forEach(showAchievementToast);
   // Easter egg: if H.D login, add PDF trait on first beat
   if(G.easterEggPDF && !G.easterEggPDFAdded) {
     G.traits.unshift({name: '!! PDF !!', bad: true});
@@ -2130,6 +2178,62 @@ async function loadLeaderboard(elId){
       `<div class="lb-row"><span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(r.playerName)}</span><span class="lb-score">${r.finalScore}<span style="color:var(--muted);font-size:10px;"> · ${r.eventsSurvived}ev</span></span></div>`
     ).join('') + '</div>';
   } catch(e){ el.innerHTML=''; }
+}
+
+// ─── ACHIEVEMENTS ───
+const ACH_SECTION_ORDER = ['SCORE','SURVIVOR','SINS','INVENTORY','FATE'];
+// Open the modal and load this player's achievements (owner resolved server-side from the
+// active session id, or the resume cookie when on the splash).
+async function openAchievements(){
+  const modal = document.getElementById('ach-modal');
+  modal.classList.add('show');
+  const body = document.getElementById('ach-body');
+  body.innerHTML = '<div class="ach-loading">Loading…</div>';
+  let list = [];
+  try {
+    const url = G.sessionId ? `${API}/achievements?sessionId=${G.sessionId}` : `${API}/achievements`;
+    const res = await fetch(url, { credentials:'same-origin' });
+    if(res.ok) list = await res.json();
+  } catch(e){ /* offline — render nothing */ }
+  renderAchievements(list);
+}
+function closeAchievements(){ document.getElementById('ach-modal').classList.remove('show'); }
+function renderAchievements(list){
+  const body = document.getElementById('ach-body');
+  if(!list || !list.length){ body.innerHTML = '<div class="ach-loading">Achievements unavailable.</div>'; return; }
+  document.getElementById('ach-count').textContent = list.filter(a=>a.unlocked).length + ' / ' + list.length;
+  const bySection = {};
+  list.forEach(a=>{ (bySection[a.section] = bySection[a.section] || []).push(a); });
+  let html = '';
+  ACH_SECTION_ORDER.forEach(sec=>{
+    const items = bySection[sec]; if(!items) return;
+    html += `<div class="ach-section"><div class="ach-sec-title">${escapeHtml(items[0].sectionLabel)}</div>`;
+    items.forEach(a=>{
+      html += `<div class="ach-card ${a.unlocked?'unlocked':'locked'}"><div class="ach-icon">${a.unlocked?'🏆':'🔒'}</div>`
+            + `<div class="ach-text"><div class="ach-name">${escapeHtml(a.title)}</div>`
+            + `<div class="ach-desc">${escapeHtml(a.description)}</div></div></div>`;
+    });
+    html += `</div>`;
+  });
+  body.innerHTML = html;
+}
+// Upper-right toast: slide in from the right, hold ~4s (within the 3-5s rule), slide+fade out.
+function showAchievementToast(a){
+  if(!a) return;
+  const stack = document.getElementById('ach-toasts');
+  if(!stack) return;
+  const el = document.createElement('div');
+  el.className = 'ach-toast';
+  el.innerHTML = `<div class="ach-toast-trophy">🏆</div><div class="ach-toast-text">`
+    + `<div class="ach-toast-title">Achievement Unlocked: ${escapeHtml(a.title)}</div>`
+    + `<div class="ach-toast-desc">${escapeHtml(a.description)}</div></div>`;
+  stack.appendChild(el);
+  try { playClickSound(); } catch(e){}
+  requestAnimationFrame(()=> el.classList.add('in'));                       // arrival animation
+  setTimeout(()=>{                                                          // hold 4s, then leave
+    el.classList.remove('in'); el.classList.add('out');
+    setTimeout(()=> el.remove(), 600);                                      // remove after exit transition
+  }, 4000);
 }
 
 // keyboard: A-D choose, space begins from splash

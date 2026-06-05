@@ -19,5 +19,6 @@ public record StoryResponse(
         List<TraitView> traits,
         List<String> items,
         int eventsSurvived,
-        int finalScore
+        int finalScore,
+        List<AchievementView> newAchievements   // achievements unlocked on THIS beat (for toasts)
 ) {}

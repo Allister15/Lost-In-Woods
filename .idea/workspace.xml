@@ -6,14 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4a129c33-986a-49d8-82ae-8aac58efe698" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/controller/StoryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/controller/StoryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/dto/StoryStartRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/dto/StoryStartRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/GameMasterPrompt.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/GameMasterPrompt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/StoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/ai/service/StoryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/dto/ResumeResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/dto/ResumeResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/model/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/model/GameSession.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -206,7 +198,7 @@
       <workItem from="1780624388824" duration="1658000" />
       <workItem from="1780627745768" duration="8888000" />
       <workItem from="1780659185819" duration="2704000" />
-      <workItem from="1780665392781" duration="2287000" />
+      <workItem from="1780665392781" duration="3427000" />
     </task>
     <servers />
   </component>
