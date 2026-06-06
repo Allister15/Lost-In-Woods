@@ -5,6 +5,8 @@ import com.DinoCorp.Lost_In_Woods.dto.LeaderboardEntry;
 import com.DinoCorp.Lost_In_Woods.dto.ResumeResponse;
 import com.DinoCorp.Lost_In_Woods.model.GameSession;
 import com.DinoCorp.Lost_In_Woods.repository.GameSessionRepository;
+import com.DinoCorp.Lost_In_Woods.repository.LeaderboardRepository;
+import com.DinoCorp.Lost_In_Woods.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +25,9 @@ import static org.mockito.Mockito.when;
 class GameSaveServiceTest {
 
     private final GameSessionRepository repo = mock(GameSessionRepository.class);
-    private final GameService service = new GameService(repo);
+    private final LeaderboardRepository leaderboardRepo = mock(LeaderboardRepository.class);
+    private final UserRepository userRepo = mock(UserRepository.class);
+    private final GameService service = new GameService(repo, leaderboardRepo, userRepo);
     private final ObjectMapper json = new ObjectMapper();
 
     @Test
