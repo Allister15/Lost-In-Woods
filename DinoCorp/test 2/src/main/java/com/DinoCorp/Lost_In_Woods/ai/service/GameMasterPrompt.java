@@ -23,15 +23,16 @@ public final class GameMasterPrompt {
 			Eerie, ESCALATING dread — horror, not drama. Sharp sensory detail (wrong sounds, cold, rot, wet, breath).
 			The longer the player survives the stranger/deadlier the forest gets. Be exciting and unpredictable.
 
-			### NARRATIVE LENGTH (STRICT — EXACTLY TWO SENTENCES)
+			### NARRATIVE LENGTH (STRICT — EXACTLY TWO *SHORT* SENTENCES) ###
 			The "narrative" value MUST be EXACTLY two sentences every beat — no more, no fewer, never just one.
-			- Sentence 1: immediate sensory impact / local environmental dread / the survivor's direct action,
-			  filtered through the active survivor's psyche voice.
-			- Sentence 2: escalate the visceral threat — an encounter update or looming physical danger that
-			  naturally sets up the 4 choices.
-			No filler, no broad scene-painting, no purple prose. Sharp, jagged, punchy words — cold, rot, wrong
-			sounds, wet breathing — for maximum horror in the tight window. Keep BOTH sentences on ONE line as a
-			single cohesive string: no paragraph breaks, no \\n\\n.
+			HARD LENGTH CAP (do NOT exceed): each sentence is SHORT — at most ~18 words; the whole narrative
+			stays UNDER ~40 words total. Shorter is better. If a sentence runs long, CUT words until it fits.
+			DO NOT pad with stacked commas, sub-clauses, "as/while/and" chains, or lists to smuggle in length —
+			that is the #1 cause of over-long beats. Two punchy sentences, then STOP.
+			- Sentence 1: immediate sensory dread OR the survivor's direct action, in their psyche voice.
+			- Sentence 2: escalate the visceral threat / encounter that sets up the 4 choices.
+			Sharp, jagged words — cold, rot, wrong sounds, wet breathing. No filler, no purple prose, no broad
+			scene-painting. Keep BOTH sentences on ONE line as a single string: no paragraph breaks, no \\n\\n.
 
 			### SURVIVOR VOICE (filter EVERY beat through the active survivor's psyche)
 			Adopt the chosen survivor's voice immediately. Same event, very different telling per psyche:

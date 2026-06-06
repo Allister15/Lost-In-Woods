@@ -4,13 +4,17 @@ import com.DinoCorp.Lost_In_Woods.ai.dto.StoryResponse;
 import com.DinoCorp.Lost_In_Woods.dto.LeaderboardEntry;
 import com.DinoCorp.Lost_In_Woods.dto.ResumeResponse;
 import com.DinoCorp.Lost_In_Woods.model.GameSession;
+import com.DinoCorp.Lost_In_Woods.model.LeaderboardRecord;
 import com.DinoCorp.Lost_In_Woods.repository.GameSessionRepository;
+import com.DinoCorp.Lost_In_Woods.repository.LeaderboardRepository;
+import com.DinoCorp.Lost_In_Woods.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +26,8 @@ import java.util.UUID;
 public class GameService {
 
     private final GameSessionRepository sessionRepository;
+    private final LeaderboardRepository leaderboardRepository;
+    private final UserRepository userRepository;
 
     // Inline (not constructor-injected) so @RequiredArgsConstructor leaves it out.
     private final ObjectMapper json = new ObjectMapper();
@@ -68,6 +74,33 @@ public class GameService {
         s.setCurrentScore(beat.score());
         s.setUpdatedAt(Instant.now());
         sessionRepository.save(s);
+
+        if (beat.gameOver()) recordFinalToLeaderboard(s);   // run ended -> submit best score
+    }
+
+    // On a finished REGISTERED run, upsert the account's HIGHEST score into the leaderboard
+    // table (indexed by username). Guests have no account row, so they're skipped here — they
+    // still appear on the live board (getLeaderboard reads game_sessions, which includes both).
+    private void recordFinalToLeaderboard(GameSession s) {
+        if (s == null || !s.isGameOver() || Boolean.TRUE.equals(s.getGuest())) return;
+        String display = s.getPlayerName();
+        if (display == null || display.isBlank()) return;
+        String canonical = display.trim().toLowerCase(Locale.ROOT);
+        if (!userRepository.existsById(canonical)) return;     // only registered accounts (FK safety)
+
+        LeaderboardRecord rec = leaderboardRepository.findById(canonical).orElseGet(() -> {
+            LeaderboardRecord r = new LeaderboardRecord();
+            r.setUsername(canonical);
+            r.setBestScore(Integer.MIN_VALUE);
+            return r;
+        });
+        if (s.getFinalScore() >= rec.getBestScore()) {         // keep only the highest historical
+            rec.setDisplayName(display);
+            rec.setBestScore(s.getFinalScore());
+            rec.setEventsSurvived(s.getEventsSurvived());
+            rec.setUpdatedAt(Instant.now());
+            leaderboardRepository.save(rec);
+        }
     }
 
     // Persist the chosen survivor once, at story start, so a resumed run reloads the
