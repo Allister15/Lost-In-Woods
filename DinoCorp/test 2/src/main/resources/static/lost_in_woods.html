@@ -651,6 +651,13 @@ body.mobile-landscape #kb{display:none;}
       </div>
       <input type="range" id="vol-sfx" min="0" max="100" value="100"
         oninput="updateSfxVolume(this.value)">
+
+      <div class="audio-row">
+        <span class="audio-label">Ambience Volume</span>
+        <span class="audio-val" id="vol-ambience-val">60%</span>
+      </div>
+      <input type="range" id="vol-ambience" min="0" max="100" value="60"
+        oninput="updateAmbienceVolume(this.value)">
     </div>
 
     <!-- Narration Tab -->
@@ -2336,6 +2343,122 @@ function resumeSavedRun(){
   renderBeat(data.beat);
 }
 checkResume();
+
+// ─── GAMEPLAY AMBIENCE — additive module (OCP: extends, never edits, the code above) ───
+// Looping music bed that runs from CHARACTER SELECTION through the whole active run,
+// and stops on the ending screen or back at the main menu. The main-menu heartbeat
+// theme (startHomeTheme/stopHomeTheme) is intentionally untouched. All integration
+// happens by decorating the existing global function bindings at the bottom of this
+// block — no original function body was modified.
+const AMBIENCE_TRACK = 'music/1-hour-of-dark-and-mysterious-ambient-music-for-writing-and-creativity-dnd-rpg-a_RqxO7khk.mp3';
+const AMBIENCE_STORE_KEY = 'liw_ambience';
+let ambienceVolume = 0.6;     // slider value 0..1. Actual volume = ambienceVolume * masterVolume.
+let gameplayAmbience = null;  // the looping <audio> element; null when stopped.
+
+function ambienceTargetVol(){ return Math.min(1, ambienceVolume * masterVolume); }
+
+function startGameplayAmbience(){
+  // Already running (char-select → gameplay must be seamless): just retune, never restart.
+  if(gameplayAmbience){
+    gameplayAmbience.volume = ambienceTargetVol();
+    if(gameplayAmbience.paused) gameplayAmbience.play().catch(()=>{});
+    return;
+  }
+  const a = new Audio(AMBIENCE_TRACK);
+  a.loop = true; a.preload = 'auto'; a.volume = 0;
+  gameplayAmbience = a;
+  // Same autoplay-safe pattern as startLocAudio: resume a suspended context first,
+  // and swallow the play() rejection if the browser still blocks it.
+  const doPlay = () => a.play().catch(()=>{});
+  if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume().then(doPlay).catch(doPlay);
+  else doPlay();
+  _fadeAudio(a, ambienceTargetVol(), 1500);
+}
+function stopGameplayAmbience(fast){
+  const a = gameplayAmbience; gameplayAmbience = null;
+  _fadeAudio(a, 0, fast ? 300 : 1200);
+}
+
+// 4th Audio-tab slider. Persisted under its own localStorage key: the existing
+// liw_audio blob lives in sessionStorage, and rewriting saveAudioSettings /
+// loadAudioSettings would break the closed-for-modification rule.
+function updateAmbienceVolume(val){
+  ambienceVolume = parseFloat(val) / 100;
+  if(gameplayAmbience) gameplayAmbience.volume = ambienceTargetVol();
+  document.getElementById('vol-ambience-val').textContent = Math.round(ambienceVolume * 100) + '%';
+  try { localStorage.setItem(AMBIENCE_STORE_KEY, String(ambienceVolume)); } catch(e) {}
+}
+(function loadAmbienceSetting(){
+  try {
+    const v = parseFloat(localStorage.getItem(AMBIENCE_STORE_KEY));
+    if(!isNaN(v)) ambienceVolume = Math.max(0, Math.min(1, v));
+  } catch(e) {}
+  document.getElementById('vol-ambience').value = Math.round(ambienceVolume * 100);
+  document.getElementById('vol-ambience-val').textContent = Math.round(ambienceVolume * 100) + '%';
+})();
+
+// ── Decorators: layer the ambience lifecycle onto the existing screen transitions ──
+
+// Entering character selection (fresh run AND "Play Again"): menu theme fades out,
+// ambience fades in, then carries seamlessly into the run (enterWoods never touches it).
+const _showCreator_orig = showCreator;
+showCreator = function(){ stopHomeTheme(); startGameplayAmbience(); _showCreator_orig(); };
+
+// RESUME BUG FIX: resuming a saved run from the menu previously left the menu
+// heartbeat playing over gameplay, because resumeSavedRun (unlike enterWoods)
+// never stopped it. Mirror enterWoods' audio handshake exactly.
+const _resumeSavedRun_orig = resumeSavedRun;
+resumeSavedRun = function(){
+  if(!pendingResume) return;
+  stopHomeTheme();
+  startGameplayAmbience();
+  if(!audioOn){ audioOn = true; startAmbient(); document.getElementById('btn-music').classList.remove('off'); }
+  _resumeSavedRun_orig();
+};
+
+// The run is over (death/escape/any ending screen): fade the ambience out.
+const _showEnd_orig = showEnd;
+showEnd = function(data){ stopGameplayAmbience(); _showEnd_orig(data); };
+
+// Back to the main menu from anywhere: ambience off before the menu theme starts.
+const _goToMenu_orig = goToMenu;
+goToMenu = function(){ stopGameplayAmbience(true); _goToMenu_orig(); };
+
+// Adam's full-demon climax track plays alone (it already silences every other bed);
+// if a later beat stops it while the run is still alive, bring the ambience back.
+const _startGodIsComing_orig = startGodIsComing;
+startGodIsComing = function(){ if(!G.godIsComingActive) stopGameplayAmbience(true); _startGodIsComing_orig(); };
+const _stopGodIsComing_orig = stopGodIsComing;
+stopGodIsComing = function(){
+  _stopGodIsComing_orig();
+  const inRun = document.getElementById('game').style.display === 'flex'
+             && !document.getElementById('end').classList.contains('show');
+  if(inRun) startGameplayAmbience();
+};
+
+// Master volume cascades into the ambience (actual = ambience * master).
+const _updateMasterVolume_orig = updateMasterVolume;
+updateMasterVolume = function(val){
+  _updateMasterVolume_orig(val);
+  if(gameplayAmbience) gameplayAmbience.volume = ambienceTargetVol();
+};
+
+// Settings popup syncs every slider from state on open — include the new one.
+const _openAudioMenu_orig = openAudioMenu;
+openAudioMenu = function(){
+  _openAudioMenu_orig();
+  document.getElementById('vol-ambience').value = Math.round(ambienceVolume * 100);
+  document.getElementById('vol-ambience-val').textContent = Math.round(ambienceVolume * 100) + '%';
+};
+
+// HUD ♪ toggle: muting "music" silences the ambience too; toggling back resumes
+// in place (the element is paused, not destroyed, so the loop position survives).
+const _toggleMusic_orig = toggleMusic;
+toggleMusic = function(){
+  _toggleMusic_orig();
+  if(!gameplayAmbience) return;
+  if(audioOn) gameplayAmbience.play().catch(()=>{}); else gameplayAmbience.pause();
+};
 
 // Caution screen — dismissing it counts as the user gesture that unlocks audio autoplay.
 document.getElementById('caution').addEventListener('click', function dismissCaution(){
