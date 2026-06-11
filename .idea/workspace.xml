@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a129c33-986a-49d8-82ae-8aac58efe698" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/java/com/DinoCorp/Lost_In_Woods/service/GameService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/main/resources/static/lost_in_woods.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DinoCorp/test 2/src/test/java/com/DinoCorp/Lost_In_Woods/service/GameSaveServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/DinoCorp/test 2/src/test/java/com/DinoCorp/Lost_In_Woods/service/GameSaveServiceTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="4a129c33-986a-49d8-82ae-8aac58efe698" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -206,6 +200,8 @@
       <workItem from="1780682325116" duration="868000" />
       <workItem from="1780708931252" duration="628000" />
       <workItem from="1780711828974" duration="247000" />
+      <workItem from="1780713989090" duration="217000" />
+      <workItem from="1780748565527" duration="200000" />
     </task>
     <servers />
   </component>
